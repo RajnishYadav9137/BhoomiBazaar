@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Mobile Number - OTP</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .otp-input-field {
+            font-size: 28px !important;
+            letter-spacing: 14px !important;
+            text-align: center !important;
+            font-weight: bold !important;
+            padding: 15px 10px !important;
+            border: 2px solid #7c5cff !important;
+            border-radius: 12px !important;
+            background: #111827 !important;
+            color: #38bdf8 !important;
+            margin-bottom: 20px !important;
+        }
+
+        .otp-phone-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(124, 92, 255, 0.15);
+            border: 1px solid rgba(124, 92, 255, 0.3);
+            color: #c4b5fd;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .demo-otp-box {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            color: #166534;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">
+            <span>✦</span> MyWebsite
+        </div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/services">Services</a>
+            <a href="/contact">Contact</a>
+        </div>
+        <a href="/login" class="login-btn">Login</a>
+    </nav>
+
+    <!-- OTP Section -->
+    <section class="register-section">
+        <div class="register-box" style="max-width: 480px;">
+            <div class="register-icon">📱</div>
+            <h1>Verify Mobile OTP</h1>
+            <p>We've sent a 6-digit OTP code to verify your new mobile number</p>
+
+            <div class="otp-phone-chip">
+                <span>📞 +91 {{ mobile }}</span>
+            </div>
+
+            <!-- Demo OTP Helper for easy testing -->
+            {% if demo_otp %}
+            <div class="demo-otp-box">
+                💡 <strong>Demo Mode:</strong> Your 6-digit OTP is <b style="font-size: 15px; color: #15803d; letter-spacing: 2px;">{{ demo_otp }}</b>
+            </div>
+            {% endif %}
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-container">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                <span>{{ message }}</span>
+                                <button type="button" class="alert-close" onclick="this.parentElement.remove();">&times;</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="/verify-otp">
+                <input
+                    type="text"
+                    name="otp"
+                    class="otp-input-field"
+                    placeholder="------"
+                    maxlength="6"
+                    pattern="[0-9]{6}"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                    required
+                    autofocus
+                >
+
+                <button type="submit" class="primary-btn register-btn" style="width: 100%; padding: 14px; font-size: 16px;">
+                    ✅ Verify & Complete Registration
+                </button>
+            </form>
+
+            <div style="margin-top: 20px; font-size: 14px; color: #94a3b8;">
+                <p>Didn't receive the OTP? 
+                    <a href="/resend-otp" id="resendLink" style="color: #818cf8; font-weight: bold; text-decoration: none;">
+                        🔄 Resend OTP
+                    </a>
+                </p>
+                <p style="margin-top: 8px;">
+                    Wrong number? 
+                    <a href="/register" style="color: #94a3b8; text-decoration: underline;">
+                        Change mobile number
+                    </a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>

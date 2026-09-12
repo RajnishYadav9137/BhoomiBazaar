@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Available Lands - MyWebsite</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background: #222;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .nav-links a,
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            margin: 0 8px;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1200px;
+            margin: 35px auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        /* SEARCH & FILTER MASTER BAR */
+        .search-filter-card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 25px;
+        }
+
+        .search-inputs-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 12px;
+            align-items: center;
+        }
+
+        @media (max-width: 1200px) {
+            .search-inputs-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .search-inputs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .search-input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1.5px solid #cbd5e1;
+            font-size: 15px;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .search-input-field:focus {
+            border-color: #7c5cff;
+            box-shadow: 0 0 0 3px rgba(124,92,255,0.15);
+        }
+
+        .radius-select-field {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1.5px solid #cbd5e1;
+            font-size: 14px;
+            background: white;
+            color: #1e293b;
+            font-weight: 500;
+            box-sizing: border-box;
+        }
+
+        .btn-near-me {
+            background: #16a34a;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.2s;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(22,163,74,0.25);
+        }
+
+        .btn-near-me:hover {
+            background: #15803d;
+            transform: translateY(-2px);
+        }
+
+        .btn-clear-filter {
+            background: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #cbd5e1;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .btn-clear-filter:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        /* Controls Bar (GPS status & View Toggle) */
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .view-toggle-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-toggle {
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #475569;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-toggle.active {
+            background: #1e293b;
+            color: white;
+            border-color: #1e293b;
+        }
+
+        /* Map Container */
+        #allLandsMap {
+            width: 100%;
+            height: 520px;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .lands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 25px;
+        }
+
+        .land-card {
+            background: white;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .land-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .land-image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            background: #f1f5f9;
+        }
+
+        .land-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-wishlist-btn {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 10;
+            background: white;
+            border: 1px solid #fecdd3;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.18);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .card-wishlist-btn:hover {
+            transform: scale(1.15);
+            background: #fff1f2;
+        }
+
+        .land-content {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .land-content h2 {
+            font-size: 19px;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .info {
+            margin: 6px 0;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        .price {
+            font-size: 21px;
+            font-weight: bold;
+            color: #16a34a !important;
+            margin: 10px 0;
+        }
+
+        .status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-available {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-sold {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .distance-tag {
+            display: inline-block;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        .view-btn {
+            display: inline-block;
+            background: #176b3a;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .view-btn:hover {
+            background: #12532d;
+        }
+
+        .no-land {
+            text-align: center;
+            background: white;
+            padding: 50px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            border: 1px solid #e2e8f0;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #475569;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .back-btn:hover {
+            background: #334155;
+        }
+
+        footer {
+            background: #1e293b;
+            color: #94a3b8;
+            text-align: center;
+            padding: 25px;
+            margin-top: 50px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<!<!-- ================= NAVIGATION ================= -->
+<nav class="navbar">
+    <div class="logo">
+        <span>🏡</span> MyWebsite
+    </div>
+
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/lands">Buy Land</a>
+        <a href="/about">About</a>
+        <a href="/services">Services</a>
+        <a href="/contact">Contact</a>
+        <a href="/wishlist" style="color: #f43f5e; font-weight: bold;">❤️ Wishlist</a>
+        <a href="/dashboard">Dashboard</a>
+    </div>
+
+    <a href="/logout" class="logout-btn">Logout</a>
+</nav>
+
+<!-- ================= AVAILABLE LANDS ================= -->
+<div class="container">
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-container">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <span>{{ message }}</span>
+                        <button type="button" class="alert-close" onclick="this.parentElement.remove();">&times;</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <h1>🗺️ Explore & Search Lands</h1>
+
+    <!-- ================= SEARCH & LOCATION FILTER CARD ================= -->
+    <div class="search-filter-card">
+        
+        <div class="search-inputs-grid">
+            <!-- WRITE LOCATION / TEXT SEARCH -->
+            <div>
+                <input
+                    type="text"
+                    id="locationSearchInput"
+                    class="search-input-field"
+                    placeholder="🔍 Search by Location (e.g. Pune, Highway, Maharashtra...), Area, Title..."
+                    oninput="filterAndSearchLands()"
+                >
+            </div>
+
+            <!-- RADIUS SELECTOR -->
+            <div>
+                <select id="radiusFilterSelect" class="radius-select-field" onchange="filterAndSearchLands()">
+                    <option value="all">🌐 Any Distance Radius</option>
+                    <option value="5">📍 Within 5 km</option>
+                    <option value="10">📍 Within 10 km</option>
+                    <option value="25" selected>📍 Within 25 km</option>
+                    <option value="50">📍 Within 50 km</option>
+                    <option value="100">📍 Within 100 km</option>
+                </select>
+            </div>
+
+            <!-- MIN PRICE -->
+            <div>
+                <input
+                    type="number"
+                    id="minPriceInput"
+                    class="search-input-field"
+                    placeholder="💰 Min Price (₹)"
+                    oninput="filterAndSearchLands()"
+                    min="0"
+                    step="1000"
+                >
+            </div>
+
+            <!-- MAX PRICE -->
+            <div>
+                <input
+                    type="number"
+                    id="maxPriceInput"
+                    class="search-input-field"
+                    placeholder="💰 Max Price (₹)"
+                    oninput="filterAndSearchLands()"
+                    min="0"
+                    step="1000"
+                >
+            </div>
+
+            <!-- SEARCH NEAR MY LOCATION BUTTON -->
+            <div>
+                <button type="button" class="btn-near-me" id="nearMeBtn" onclick="searchNearMyLocation()" style="width: 100%;">
+                    📍 Search Near Me
+                </button>
+            </div>
+
+            <!-- RESET / CLEAR -->
+            <div>
+                <button type="button" class="btn-clear-filter" onclick="resetAllFilters()">
+                    🔄 Reset
+                </button>
+            </div>
+        </div>
+
+        <!-- GPS STATUS & VIEW SWITCHER CONTROLS -->
+        <div class="controls-bar">
+            
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <span id="gpsInfoText" style="font-size: 13px; color: #16a34a; font-weight: 600;"></span>
+                <span id="searchResultCount" style="font-size: 13px; color: #64748b; font-weight: bold;">
+                    Showing all {{ lands|length }} properties
+                </span>
+            </div>
+
+            <!-- STATUS FILTER BUTTONS -->
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                <span style="font-size: 13px; font-weight: bold; color: #475569;">Status:</span>
+                <a href="/lands" class="btn-toggle {% if current_filter == 'All' %}active{% endif %}" style="text-decoration: none;">
+                    🌐 All
+                </a>
+                <a href="/lands?status=Available" class="btn-toggle {% if current_filter == 'Available' %}active{% endif %}" style="text-decoration: none;">
+                    🟢 Available
+                </a>
+                <a href="/lands?status=Sold" class="btn-toggle {% if current_filter == 'Sold' %}active{% endif %}" style="text-decoration: none;">
+                    🔴 Sold Out
+                </a>
+            </div>
+
+            <div class="view-toggle-btns">
+                <button type="button" class="btn-toggle active" id="gridViewBtn" onclick="switchView('grid')">
+                    📋 Cards Grid
+                </button>
+                <button type="button" class="btn-toggle" id="mapViewBtn" onclick="switchView('map')">
+                    🗺️ Map View
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- INTERACTIVE FULL MAP CONTAINER -->
+    <div id="allLandsMap"></div>
+
+    <!-- CARDS GRID -->
+    {% if lands %}
+
+        <div class="lands-grid" id="landsGrid">
+
+            {% for land in lands %}
+
+                <div class="land-card"
+                     id="landCard{{ land.id }}"
+                     data-id="{{ land.id }}"
+                     data-title="{{ land.title|lower }}"
+                     data-location="{{ land.location|lower }}"
+                     data-area="{{ land.area|lower }}"
+                     data-status="{{ land.status }}"
+                     data-lat="{{ land.latitude if land.latitude is not none else '' }}"
+                     data-lng="{{ land.longitude if land.longitude is not none else '' }}">
+
+                    <div class="land-image-wrapper">
+                        <!-- WISHLIST (WHITE LIST) HEART BUTTON -->
+                        <button type="button" 
+                                class="card-wishlist-btn" 
+                                onclick="toggleWishlist({{ land.id }}, this)"
+                                title="{% if land.id in user_wishlist_ids %}Remove from Wishlist{% else %}Save to Wishlist{% endif %}">
+                            {% if land.id in user_wishlist_ids %}❤️{% else %}🤍{% endif %}
+                        </button>
+
+                        <!-- STATUS RIBBON FOR SOLD OUT -->
+                        {% if land.status == 'Sold' %}
+                            <div style="position: absolute; top: 12px; right: 12px; z-index: 10; background: #dc2626; color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; box-shadow: 0 2px 8px rgba(220,38,38,0.5);">
+                                🔴 SOLD OUT
+                            </div>
+                        {% else %}
+                            <div style="position: absolute; top: 12px; right: 12px; z-index: 10; background: #16a34a; color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; box-shadow: 0 2px 8px rgba(22,163,74,0.5);">
+                                🟢 AVAILABLE
+                            </div>
+                        {% endif %}
+
+                        <!-- LAND PHOTO -->
+                        {% if land.image %}
+                            <img
+                                src="{{ url_for('static', filename='uploads/' + land.image) }}"
+                                class="land-image"
+                                alt="{{ land.title }}"
+                                style="{% if land.status == 'Sold' %}filter: grayscale(40%);{% endif %}"
+                            >
+                        {% else %}
+                            <div class="land-image" style="background:#e2e8f0; display:flex; align-items:center; justify-content:center; color:#64748b; font-weight:bold;">
+                                🏡 No Image Available
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- LAND DETAILS -->
+                    <div class="land-content">
+
+                        <h2>🏡 {{ land.title }}</h2>
+
+                        <div class="info">
+                            📍 <strong>Location:</strong> <span class="card-location-text">{{ land.location }}</span>
+                        </div>
+
+                        <div class="info">
+                            📐 <strong>Area:</strong> {{ land.area }}
+                        </div>
+
+                        <div class="info price">
+                            💰 ₹{{ "{:,.0f}".format(land.price|float) if land.price is defined else land.price }}
+                        </div>
+
+                        <!-- SELLER INFO CARD (WITH AVATAR, NAME & EMAIL) -->
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin: 10px 0;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                                {% if land.seller_profile_pic %}
+                                    <img
+                                        src="{{ url_for('static', filename='uploads/' + land.seller_profile_pic) }}"
+                                        alt="{{ land.seller_name }}"
+                                        style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid #7c5cff;"
+                                    >
+                                {% else %}
+                                    <div style="width: 34px; height: 34px; border-radius: 50%; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold;">
+                                        👤
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <div style="font-size: 14px; font-weight: bold; color: #1e293b;">
+                                        {{ land.seller_name }}
+                                    </div>
+                                    <div style="font-size: 11px; color: #64748b;">
+                                        Verified Seller
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if land.seller_email %}
+                            <div style="font-size: 13px; color: #475569; margin-top: 4px; word-break: break-all;">
+                                📧 <strong>Email:</strong>
+                                <a href="mailto:{{ land.seller_email }}?subject=Inquiry%20about%20{{ land.title }}" style="color: #2563eb; text-decoration: none; font-weight: 500;">
+                                    {{ land.seller_email }}
+                                </a>
+                            </div>
+                            {% endif %}
+
+                            {% if land.seller_mobile %}
+                            <div style="font-size: 13px; color: #475569; margin-top: 4px;">
+                                📞 <strong>Mobile:</strong>
+                                <a href="tel:{{ land.seller_mobile }}" style="color: #0284c7; text-decoration: none; font-weight: 600;">
+                                    {{ land.seller_mobile }}
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="info">
+                            📌 <strong>Status:</strong>
+                            <span class="status {% if land.status == 'Available' %}status-available{% else %}status-sold{% endif %}">
+                                {% if land.status == 'Available' %}🟢 Available{% else %}🔴 Sold Out{% endif %}
+                            </span>
+                        </div>
+
+                        <!-- LIVE DISTANCE BADGE (Populated by GPS) -->
+                        <div class="distance-slot"></div>
+
+                        {% if land.latitude and land.longitude %}
+                            <div class="info" style="color: #16a34a; font-weight: 500; font-size: 13px;">
+                                🌍 GPS Verified
+                            </div>
+                        {% endif %}
+
+                        <!-- ACTION BUTTONS: VIEW DETAILS, WHATSAPP, EMAIL -->
+                        <div style="display:flex; gap:8px; margin-top:auto; padding-top:15px;">
+                            <a
+                                href="/land/{{ land.id }}"
+                                class="view-btn"
+                                style="flex:1;">
+                                👀 View Details
+                            </a>
+
+                            {% if land.seller_email %}
+                            <a
+                                href="mailto:{{ land.seller_email }}?subject=Inquiry%20about%20{{ land.title }}"
+                                class="view-btn"
+                                style="background:#3b82f6; text-align:center; padding:10px 14px;"
+                                title="Send Email to Seller">
+                                📧
+                            </a>
+                            {% endif %}
+
+                            {% if land.seller_mobile %}
+                            <a
+                                href="https://wa.me/91{{ land.seller_mobile }}?text=Hello%20{{ land.seller_name }}%2C%20I%20am%20interested%20in%20your%20land%20'{{ land.title }}'"
+                                target="_blank"
+                                class="view-btn"
+                                style="background:#25d366; text-align:center; padding:10px 14px;"
+                                title="Chat on WhatsApp">
+                                💬
+                            </a>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+        <!-- NO SEARCH RESULTS FOUND CONTAINER -->
+        <div id="noSearchResultsBox" class="no-land" style="display: none; margin-top: 20px;">
+            <h2>🔍 No Matching Lands Found</h2>
+            <p>No property listings match your search location or distance radius.</p>
+            <button type="button" class="btn-clear-filter" onclick="resetAllFilters()" style="margin-top: 10px; background: #7c5cff; color: white;">
+                🔄 Reset Search & Filters
+            </button>
+        </div>
+
+    {% else %}
+
+        <div class="no-land">
+            <h2>🏡 No Lands Found</h2>
+            <p>No listings are available matching your selection.</p>
+            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+                <a href="/lands" class="view-btn" style="background: #475569;">
+                    🌐 View All Lands
+                </a>
+                <a href="/sell-land" class="view-btn">
+                    🏡 Sell Your Land
+                </a>
+            </div>
+        </div>
+
+    {% endif %}
+
+    <br>
+
+    <a href="/dashboard" class="back-btn">
+        ← Back to Dashboard
+    </a>
+
+</div>
+
+<!-- ================= LEAFLET JS & SCRIPTS ================= -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// Data array of all lands for Map View
+const landsData = [
+    {% for land in lands %}
+    {
+        id: {{ land.id }},
+        title: {{ land.title|tojson }},
+        location: {{ land.location|tojson }},
+        area: {{ land.area|tojson }},
+        price: {{ land.price|tojson }},
+        status: {{ land.status|tojson }},
+        seller_name: {{ land.seller_name|tojson }},
+        seller_email: {{ (land.seller_email or '')|tojson }},
+        lat: {{ land.latitude if land.latitude is not none else 'null' }},
+        lng: {{ land.longitude if land.longitude is not none else 'null' }},
+        image: {{ (url_for('static', filename='uploads/' + land.image))|tojson if land.image else 'null' }}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
+
+let allLandsMapInstance = null;
+let mapMarkers = [];
+let currentUserPosition = null;
+
+function switchView(view) {
+    const gridView = document.getElementById("landsGrid");
+    const mapView = document.getElementById("allLandsMap");
+    const gridBtn = document.getElementById("gridViewBtn");
+    const mapBtn = document.getElementById("mapViewBtn");
+
+    if (view === 'map') {
+        if (gridView) gridView.style.display = "none";
+        mapView.style.display = "block";
+        gridBtn.classList.remove("active");
+        mapBtn.classList.add("active");
+
+        initAllLandsMap();
+    } else {
+        if (gridView) gridView.style.display = "grid";
+        mapView.style.display = "none";
+        gridBtn.classList.add("active");
+        mapBtn.classList.remove("active");
+    }
+}
+
+function initAllLandsMap() {
+    if (allLandsMapInstance) {
+        allLandsMapInstance.invalidateSize();
+        updateMapMarkers();
+        return;
+    }
+
+    allLandsMapInstance = L.map('allLandsMap').setView([20.5937, 78.9629], 5);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(allLandsMapInstance);
+
+    updateMapMarkers();
+}
+
+function updateMapMarkers(filteredIds = null) {
+    if (!allLandsMapInstance) return;
+
+    // Clear existing markers
+    mapMarkers.forEach(m => allLandsMapInstance.removeLayer(m));
+    mapMarkers = [];
+
+    const validMarkers = [];
+
+    landsData.forEach(land => {
+        if (land.lat && land.lng) {
+            if (filteredIds && !filteredIds.has(land.id)) {
+                return;
+            }
+
+            const marker = L.marker([land.lat, land.lng]).addTo(allLandsMapInstance);
+            mapMarkers.push(marker);
+            
+            const isSold = land.status === 'Sold';
+            const statusBadge = isSold 
+                ? '<span style="display:inline-block; padding:2px 8px; border-radius:10px; background:#fee2e2; color:#b91c1c; font-size:11px; font-weight:bold;">🔴 Sold Out</span>'
+                : '<span style="display:inline-block; padding:2px 8px; border-radius:10px; background:#dcfce7; color:#15803d; font-size:11px; font-weight:bold;">🟢 Available</span>';
+
+            let popupContent = `
+                <div style="width: 220px; font-family: Arial, sans-serif;">
+                    ${land.image ? `<img src="${land.image}" style="width:100%; height:110px; object-fit:cover; border-radius:6px; margin-bottom:6px;">` : ''}
+                    <div style="margin-bottom:4px;">${statusBadge}</div>
+                    <b style="font-size:14px; color:#1e293b;">${land.title}</b><br>
+                    <span style="font-size:12px; color:#64748b;">📍 ${land.location}</span><br>
+                    <b style="color:#16a34a; font-size:14px;">₹ ${land.price}</b><br>
+                    <span style="font-size:12px; color:#475569;">👤 Seller: <b>${land.seller_name}</b></span><br>
+                    ${land.seller_email ? `<span style="font-size:11px; color:#2563eb;">📧 ${land.seller_email}</span><br>` : ''}
+                    <a href="/land/${land.id}" style="display:inline-block; margin-top:8px; padding:6px 12px; background:#16a34a; color:white; border-radius:4px; text-decoration:none; font-size:12px; font-weight:bold;">View Details →</a>
+                </div>
+            `;
+            marker.bindPopup(popupContent);
+            validMarkers.push([land.lat, land.lng]);
+        }
+    });
+
+    if (validMarkers.length > 0) {
+        allLandsMapInstance.fitBounds(validMarkers, { padding: [50, 50] });
+    }
+}
+
+// Distance Calculation (Haversine Formula)
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
+// Search Near My Location via Live GPS
+function searchNearMyLocation() {
+    const infoText = document.getElementById("gpsInfoText");
+    const nearMeBtn = document.getElementById("nearMeBtn");
+
+    if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser.");
+        return;
+    }
+
+    infoText.innerText = "📡 Fetching GPS location...";
+    nearMeBtn.disabled = true;
+
+    navigator.geolocation.getCurrentPosition(
+        function (position) {
+            nearMeBtn.disabled = false;
+            currentUserPosition = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+
+            infoText.innerText = `✅ GPS Active! Filtering by distance...`;
+            filterAndSearchLands();
+        },
+        function (error) {
+            nearMeBtn.disabled = false;
+            infoText.innerText = "❌ Location access denied.";
+            alert("Could not access your location. Please check browser location permissions.");
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+
+// Filter and Search Engine (Combined Text Search & GPS Radius Filter)
+function filterAndSearchLands() {
+    const searchInput = document.getElementById("locationSearchInput");
+    const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
+    const radiusVal = document.getElementById("radiusFilterSelect") ? document.getElementById("radiusFilterSelect").value : "all";
+    const maxRadius = radiusVal === "all" ? Infinity : parseFloat(radiusVal);
+
+    const cards = Array.from(document.querySelectorAll(".land-card"));
+    const visibleLandIds = new Set();
+    const cardDistances = [];
+    let matchCount = 0;
+
+    cards.forEach(card => {
+        const title = card.dataset.title || "";
+        const location = card.dataset.location || "";
+        const area = card.dataset.area || "";
+        const lat = parseFloat(card.dataset.lat);
+        const lng = parseFloat(card.dataset.lng);
+        const distanceSlot = card.querySelector(".distance-slot");
+        const landId = parseInt(card.dataset.id);
+
+        // 1. Text Search Match
+        const matchesQuery = query === "" || 
+            title.includes(query) || 
+            location.includes(query) || 
+            area.includes(query);
+
+        // 2. Distance Calculation & Radius Match
+        let distKm = null;
+        let matchesRadius = true;
+
+        if (currentUserPosition && !isNaN(lat) && !isNaN(lng)) {
+            distKm = calculateDistance(currentUserPosition.lat, currentUserPosition.lng, lat, lng);
+            if (distKm > maxRadius) {
+                matchesRadius = false;
+            }
+            if (distanceSlot) {
+                let distText = distKm < 1 ? `${Math.round(distKm * 1000)} m` : `${distKm.toFixed(1)} km`;
+                distanceSlot.innerHTML = `<span class="distance-tag">📍 🚗 ${distText} away from you</span>`;
+            }
+        } else if (currentUserPosition && (isNaN(lat) || isNaN(lng))) {
+            if (radiusVal !== "all") {
+                matchesRadius = false; // Coordinates unknown, exclude from strict radius filter
+            }
+        }
+
+        // 3. Price (Budget) Filter
+        let matchesPrice = true;
+        const minPriceInput = document.getElementById("minPriceInput");
+        const maxPriceInput = document.getElementById("maxPriceInput");
+        const minPrice = minPriceInput ? parseFloat(minPriceInput.value) : null;
+        const maxPrice = maxPriceInput ? parseFloat(maxPriceInput.value) : null;
+        const landPrice = landsData[i] ? landsData[i].price : null;
+
+        if (landPrice !== null) {
+            if (minPrice !== null && landPrice < minPrice) {
+                matchesPrice = false;
+            }
+            if (maxPrice !== null && landPrice > maxPrice) {
+                matchesPrice = false;
+            }
+        }
+
+        // Final Visibility
+        if (matchesQuery && matchesRadius && matchesPrice) {
+            card.style.display = "flex";
+            visibleLandIds.add(landId);
+            matchCount++;
+            cardDistances.push({ card, distance: distKm !== null ? distKm : 999999 });
+        } else {
+            card.style.display = "none";
+        }
+    });
+
+    // Sort visible cards by nearest distance if GPS active
+    if (currentUserPosition) {
+        cardDistances.sort((a, b) => a.distance - b.distance);
+        const grid = document.getElementById("landsGrid");
+        if (grid) {
+            cardDistances.forEach(item => grid.appendChild(item.card));
+        }
+    }
+
+    // Update Counter & Empty State
+    const countBadge = document.getElementById("searchResultCount");
+    const noResultsBox = document.getElementById("noSearchResultsBox");
+    if (countBadge) {
+        countBadge.innerText = `Showing ${matchCount} of ${cards.length} properties`;
+    }
+    if (noResultsBox) {
+        noResultsBox.style.display = (matchCount === 0 && cards.length > 0) ? "block" : "none";
+    }
+
+    // Update Map
+    updateMapMarkers(visibleLandIds);
+}
+
+// Reset All Search and Filters
+function resetAllFilters() {
+    const searchInput = document.getElementById("locationSearchInput");
+    if (searchInput) searchInput.value = "";
+    
+    const radiusSelect = document.getElementById("radiusFilterSelect");
+    if (radiusSelect) radiusSelect.value = "all";
+
+    // Reset price filters
+    const minPriceInput = document.getElementById("minPriceInput");
+    if (minPriceInput) minPriceInput.value = "";
+    const maxPriceInput = document.getElementById("maxPriceInput");
+    if (maxPriceInput) maxPriceInput.value = "";
+
+    currentUserPosition = null;
+    document.getElementById("gpsInfoText").innerText = "";
+    
+    document.querySelectorAll(".distance-slot").forEach(slot => slot.innerHTML = "");
+
+    filterAndSearchLands();
+}
+
+// Wishlist (White List) AJAX Toggle
+function toggleWishlist(landId, btnElement) {
+    fetch(`/toggle-wishlist/${landId}`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (response.status === 401) {
+            window.location.href = '/login';
+            return null;
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data && data.success) {
+            if (data.is_saved) {
+                btnElement.innerText = "❤️";
+                btnElement.title = "Remove from Wishlist";
+                btnElement.style.transform = "scale(1.3)";
+                setTimeout(() => { btnElement.style.transform = "scale(1)"; }, 200);
+            } else {
+                btnElement.innerText = "🤍";
+                btnElement.title = "Save to Wishlist";
+            }
+        }
+    })
+    .catch(err => {
+        // Fallback standard navigation
+        window.location.href = `/toggle-wishlist/${landId}`;
+    });
+}
+</script>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+    © 2026 MyWebsite Land Portal. All rights reserved.
+</footer>
+
+</body>
+</html>===== FOOTER ================= -->
+<footer>
+    © 2026 MyWebsite Land Portal. All rights reserved.
+</footer>
+
+</body>
+</html>

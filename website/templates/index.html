@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Sell Your Land - MyWebsite</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+
+        /* ================= RESET ================= */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f8f6;
+            color: #222;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+
+        /* ================= NAVBAR ================= */
+
+        .navbar {
+            width: 100%;
+            min-height: 70px;
+            padding: 15px 6%;
+
+            background: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: bold;
+            color: #176b3a;
+        }
+
+        .logo span {
+            color: #28a745;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: #28a745;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .welcome-user {
+            font-weight: bold;
+            color: #176b3a;
+        }
+
+        .login-btn,
+        .register-nav-btn,
+        .logout-btn {
+            padding: 9px 15px;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .login-btn {
+            background: #176b3a;
+        }
+
+        .register-nav-btn {
+            background: #28a745;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+        }
+
+
+        /* ================= HERO ================= */
+
+        .hero {
+            min-height: 620px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+
+            padding: 70px 20px;
+
+            background:
+                linear-gradient(
+                    rgba(0, 70, 30, 0.72),
+                    rgba(0, 30, 15, 0.72)
+                ),
+                url("{{ url_for('static', filename='land.jpg') }}");
+
+            background-size: cover;
+            background-position: center;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            color: white;
+        }
+
+        .small-title {
+            font-size: 16px;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .hero h1 {
+            font-size: 58px;
+            line-height: 1.15;
+            margin-bottom: 25px;
+        }
+
+        .hero h1 span {
+            color: #7cff9b;
+        }
+
+        .hero-description {
+            max-width: 700px;
+            margin: auto;
+
+            font-size: 20px;
+            line-height: 1.7;
+
+            color: #f0f0f0;
+
+            margin-bottom: 35px;
+        }
+
+
+        /* ================= HERO BUTTONS ================= */
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .sell-land-btn {
+            display: inline-block;
+
+            background: #28a745;
+            color: white;
+
+            padding: 15px 30px;
+
+            border-radius: 8px;
+
+            font-size: 18px;
+            font-weight: bold;
+
+            transition: 0.3s;
+        }
+
+        .sell-land-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .view-land-btn {
+            display: inline-block;
+
+            background: white;
+            color: #176b3a;
+
+            padding: 15px 30px;
+
+            border-radius: 8px;
+
+            font-size: 18px;
+            font-weight: bold;
+
+            transition: 0.3s;
+        }
+
+        .view-land-btn:hover {
+            background: #eeeeee;
+            transform: translateY(-2px);
+        }
+
+
+        /* ================= FEATURES ================= */
+
+        .features {
+            padding: 70px 6%;
+            text-align: center;
+        }
+
+        .section-title {
+            color: #28a745;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .features h2 {
+            font-size: 38px;
+            margin-bottom: 45px;
+        }
+
+        .feature-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .feature-card {
+            background: white;
+
+            padding: 35px 25px;
+
+            border-radius: 12px;
+
+            box-shadow:
+                0 5px 20px rgba(0,0,0,0.08);
+
+            transition: 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+
+        /* ================= HOW IT WORKS ================= */
+
+        .how-section {
+            background: #eaf6ed;
+
+            padding: 70px 6%;
+
+            text-align: center;
+        }
+
+        .how-section h2 {
+            font-size: 38px;
+            margin-bottom: 45px;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .step {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+
+            margin: 0 auto 15px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #28a745;
+            color: white;
+
+            border-radius: 50%;
+
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .step h3 {
+            margin-bottom: 10px;
+        }
+
+        .step p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+
+        /* ================= CTA ================= */
+
+        .cta {
+            padding: 75px 20px;
+
+            background: #176b3a;
+
+            color: white;
+
+            text-align: center;
+        }
+
+        .cta h2 {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .cta p {
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+
+        /* ================= FOOTER ================= */
+
+        footer {
+            background: #111;
+            color: white;
+
+            text-align: center;
+
+            padding: 22px;
+        }
+
+
+        /* ================= MOBILE ================= */
+
+        @media (max-width: 900px) {
+
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .user-menu {
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 42px;
+            }
+
+            .feature-container,
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+
+        @media (max-width: 500px) {
+
+            .hero {
+                min-height: 550px;
+            }
+
+            .hero h1 {
+                font-size: 34px;
+            }
+
+            .hero-description {
+                font-size: 17px;
+            }
+
+            .sell-land-btn,
+            .view-land-btn {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ================= NAVBAR ================= -->
+
+<nav class="navbar">
+
+    <div class="logo">
+        <span>🏡</span> MyWebsite
+    </div>
+
+
+    <div class="nav-links">
+
+        <a href="/">
+            Home
+        </a>
+
+        <a href="/lands">
+            Buy Land
+        </a>
+
+        <a href="/about">
+            About
+        </a>
+
+        <a href="/services">
+            Services
+        </a>
+
+        <a href="/contact">
+            Contact
+        </a>
+
+    </div>
+
+
+    <!-- LOGIN / USER MENU -->
+
+    <div class="user-menu">
+
+        {% if session.get("user_id") %}
+
+            <span class="welcome-user">
+                Hi, {{ session.get("user_name") }}
+            </span>
+
+            <a href="/dashboard"
+               class="login-btn">
+                Dashboard
+            </a>
+
+            <a href="/profile"
+               class="login-btn">
+                Profile
+            </a>
+
+            <a href="/logout"
+               class="logout-btn">
+                Logout
+            </a>
+
+        {% else %}
+
+            <a href="/login"
+               class="login-btn">
+                Login
+            </a>
+
+            <a href="/register"
+               class="register-nav-btn">
+                Register
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</nav>
+
+
+
+<!-- ================= HERO ================= -->
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <p class="small-title">
+            🏡 LAND BUYING & SELLING PLATFORM
+        </p>
+
+
+        <h1>
+
+            Sell Your
+            <span>Land</span>
+
+            Easily & Securely
+
+        </h1>
+
+
+        <p class="hero-description">
+
+            Upload your land photos, add location,
+            area, price and description and
+            connect with potential buyers.
+
+        </p>
+
+
+        <div class="hero-buttons">
+
+
+            {% if session.get("user_id") %}
+
+                <a href="/sell-land"
+                   class="sell-land-btn">
+
+                    🏡 Sell Your Land
+
+                </a>
+
+
+                <a href="/lands"
+                   class="view-land-btn">
+
+                    🔎 View Available Lands
+
+                </a>
+
+            {% else %}
+
+                <a href="/login"
+                   class="sell-land-btn">
+
+                    🏡 Sell Your Land
+
+                </a>
+
+
+                <a href="/lands"
+                   class="view-land-btn">
+
+                    🔎 View Available Lands
+
+                </a>
+
+            {% endif %}
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= FEATURES ================= -->
+
+<section class="features">
+
+    <p class="section-title">
+        OUR FEATURES
+    </p>
+
+
+    <h2>
+        Sell Your Land With Ease
+    </h2>
+
+
+    <div class="feature-container">
+
+
+        <!-- PHOTO -->
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                📸
+            </div>
+
+            <h3>
+                Upload Land Photos
+            </h3>
+
+            <p>
+
+                Upload clear photos of your
+                property and show buyers
+                what your land looks like.
+
+            </p>
+
+        </div>
+
+
+        <!-- LOCATION -->
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                📍
+            </div>
+
+            <h3>
+                Add Location
+            </h3>
+
+            <p>
+
+                Add your land location,
+                latitude and longitude
+                for better identification.
+
+            </p>
+
+        </div>
+
+
+        <!-- PRICE -->
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                💰
+            </div>
+
+            <h3>
+                Set Your Price
+            </h3>
+
+            <p>
+
+                Add your expected land price
+                and provide complete property
+                information.
+
+            </p>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= HOW IT WORKS ================= -->
+
+<section class="how-section">
+
+    <p class="section-title">
+        SIMPLE PROCESS
+    </p>
+
+
+    <h2>
+        How It Works
+    </h2>
+
+
+    <div class="steps">
+
+
+        <!-- STEP 1 -->
+
+        <div class="step">
+
+            <div class="step-number">
+                1
+            </div>
+
+            <h3>
+                Create Account
+            </h3>
+
+            <p>
+
+                Register your account
+                and login to your dashboard.
+
+            </p>
+
+        </div>
+
+
+        <!-- STEP 2 -->
+
+        <div class="step">
+
+            <div class="step-number">
+                2
+            </div>
+
+            <h3>
+                Upload Your Land
+            </h3>
+
+            <p>
+
+                Add land title, location,
+                photo, area, price and description.
+
+            </p>
+
+        </div>
+
+
+        <!-- STEP 3 -->
+
+        <div class="step">
+
+            <div class="step-number">
+                3
+            </div>
+
+            <h3>
+                Connect With Buyers
+            </h3>
+
+            <p>
+
+                Buyers can view your land
+                details and seller information.
+
+            </p>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= CTA ================= -->
+
+<section class="cta">
+
+    <h2>
+        Ready to Sell Your Land?
+    </h2>
+
+
+    <p>
+        Publish your property today
+        and reach potential buyers.
+    </p>
+
+
+    <a href="/sell-land"
+       class="sell-land-btn">
+
+        🏡 Sell Your Land
+
+    </a>
+
+</section>
+
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer>
+
+    <p>
+        © 2026 MyWebsite.
+        All rights reserved.
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>

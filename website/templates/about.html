@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - MyWebsite Land Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f8f6;
+            color: #222;
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* ================= NAVBAR ================= */
+        .navbar {
+            width: 100%;
+            min-height: 70px;
+            padding: 15px 6%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #176b3a;
+        }
+
+        .logo span {
+            color: #28a745;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: #333;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #28a745;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .login-btn {
+            background: #176b3a;
+            color: white;
+            padding: 9px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .login-btn:hover {
+            background: #12532d;
+        }
+
+        .register-nav-btn {
+            background: #28a745;
+            color: white;
+            padding: 9px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            padding: 9px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        /* ================= HERO BANNER ================= */
+        .about-hero {
+            background: linear-gradient(rgba(10, 60, 25, 0.82), rgba(8, 40, 18, 0.82)),
+                        url("{{ url_for('static', filename='land.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            padding: 90px 20px;
+        }
+
+        .about-hero h1 {
+            font-size: 46px;
+            margin-bottom: 18px;
+            font-weight: 800;
+        }
+
+        .about-hero h1 span {
+            color: #7cff9b;
+        }
+
+        .about-hero p {
+            font-size: 19px;
+            max-width: 750px;
+            margin: 0 auto;
+            color: #e2e8f0;
+        }
+
+        /* ================= MAIN CONTAINER ================= */
+        .about-container {
+            width: 90%;
+            max-width: 1150px;
+            margin: 50px auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 45px;
+        }
+
+        .section-tag {
+            display: inline-block;
+            background: #dcfce7;
+            color: #15803d;
+            font-weight: bold;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .section-header h2 {
+            font-size: 34px;
+            color: #1e293b;
+        }
+
+        /* ================= FEATURE CARDS ================= */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+            margin-bottom: 60px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 35px 25px;
+            border-radius: 14px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            border: 1px solid #eef2f6;
+            text-align: center;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 18px;
+            display: inline-block;
+        }
+
+        .feature-card h3 {
+            font-size: 20px;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: #64748b;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* ================= STORY / MISSION ================= */
+        .story-section {
+            background: white;
+            border-radius: 16px;
+            padding: 45px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            margin-bottom: 60px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .story-content h3 {
+            font-size: 28px;
+            color: #176b3a;
+            margin-bottom: 15px;
+        }
+
+        .story-content p {
+            color: #475569;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .story-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .stat-box {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 22px;
+            text-align: center;
+        }
+
+        .stat-box h4 {
+            font-size: 32px;
+            color: #16a34a;
+            margin-bottom: 5px;
+        }
+
+        .stat-box p {
+            font-size: 14px;
+            color: #166534;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        /* ================= CTA BANNER ================= */
+        .cta-banner {
+            background: linear-gradient(135deg, #176b3a, #28a745);
+            color: white;
+            border-radius: 16px;
+            padding: 50px 30px;
+            text-align: center;
+        }
+
+        .cta-banner h2 {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .cta-banner p {
+            font-size: 18px;
+            margin-bottom: 28px;
+            opacity: 0.95;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-white {
+            background: white;
+            color: #176b3a;
+            padding: 13px 28px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+
+        .btn-white:hover {
+            background: #f1f5f9;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            padding: 11px 26px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* ================= FOOTER ================= */
+        footer {
+            background: #1e293b;
+            color: #94a3b8;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 60px;
+        }
+
+        @media (max-width: 768px) {
+            .story-section {
+                grid-template-columns: 1fr;
+            }
+            .about-hero h1 {
+                font-size: 34px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+    <nav class="navbar">
+        <div class="logo">
+            <span>🏡</span> MyWebsite
+        </div>
+
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/lands">Buy Land</a>
+            <a href="/about" class="active">About</a>
+            <a href="/services">Services</a>
+            <a href="/contact">Contact</a>
+        </div>
+
+        <div class="user-menu">
+            {% if session.get("user_id") %}
+                <a href="/dashboard" class="login-btn">Dashboard</a>
+                <a href="/logout" class="logout-btn">Logout</a>
+            {% else %}
+                <a href="/login" class="login-btn">Login</a>
+                <a href="/register" class="register-nav-btn">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- ================= HERO ================= -->
+    <header class="about-hero">
+        <h1>About <span>MyWebsite</span> Land Portal</h1>
+        <p>India's trusted marketplace for buying, selling, and discovering verified plots, farmland, residential, and commercial land directly.</p>
+    </header>
+
+    <!-- ================= CONTENT ================= -->
+    <div class="about-container">
+
+        <div class="section-header">
+            <span class="section-tag">WHO WE ARE</span>
+            <h2>Simplifying Land Deals for Everyone</h2>
+        </div>
+
+        <!-- FEATURES GRID -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🤝</div>
+                <h3>Zero Middlemen</h3>
+                <p>Connect directly with genuine landowners and verified buyers. No unnecessary brokerage or hidden fees.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📍</div>
+                <h3>GPS & Map Verified</h3>
+                <p>Explore precise land coordinates on interactive maps and get instant driving directions directly to the plot.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3>Direct WhatsApp & Call</h3>
+                <p>Initiate one-click phone calls or WhatsApp chats with sellers to negotiate and ask questions immediately.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Fast & Free Listing</h3>
+                <p>List your property in under 2 minutes with photos, pricing, location, and property specifications.</p>
+            </div>
+        </div>
+
+        <!-- STORY / MISSION -->
+        <div class="story-section">
+            <div class="story-content">
+                <h3>Our Mission</h3>
+                <p>Finding the right piece of land or selling property shouldn't be complicated, slow, or expensive. We built <strong>MyWebsite</strong> to bring complete transparency to the land marketplace.</p>
+                <p>Whether you're looking for agricultural land for farming, commercial plots for business, or residential land for your dream home, we provide the platform to connect buyers and sellers seamlessly.</p>
+            </div>
+
+            <div class="story-stats">
+                <div class="stat-box">
+                    <h4>100%</h4>
+                    <p>Direct Seller Contact</p>
+                </div>
+                <div class="stat-box">
+                    <h4>₹0</h4>
+                    <p>Brokerage Fee</p>
+                </div>
+                <div class="stat-box">
+                    <h4>Live</h4>
+                    <p>GPS Coordinates</p>
+                </div>
+                <div class="stat-box">
+                    <h4>24/7</h4>
+                    <p>Open Marketplace</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA BANNER -->
+        <div class="cta-banner">
+            <h2>Ready to Buy or Sell Land?</h2>
+            <p>Join thousands of buyers and landowners today. Explore listings or publish your plot for free.</p>
+            <div class="cta-buttons">
+                <a href="/lands" class="btn-white">🔍 Browse Available Lands</a>
+                <a href="/sell-land" class="btn-outline">🏡 Publish Your Land</a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= FOOTER ================= -->
+    <footer>
+        <p>© 2026 MyWebsite Land Portal. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

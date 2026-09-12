@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Lands - MyWebsite</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background: #1f2937;
+            color: white;
+            padding: 18px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            margin: 0;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            color: #1f2937;
+        }
+
+        .land-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .land-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .land-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .land-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .land-card-no-img {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e2e8f0;
+            color: #64748b;
+            font-weight: bold;
+        }
+
+        .land-content {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .land-content h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #1e293b;
+            font-size: 20px;
+        }
+
+        .land-content p {
+            margin: 6px 0;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        .price {
+            color: #16a34a !important;
+            font-size: 20px !important;
+            font-weight: bold;
+            margin: 10px 0 !important;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            width: fit-content;
+        }
+
+        .status-available {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-sold {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        /* Action Buttons Grid */
+        .card-actions {
+            margin-top: auto;
+            padding-top: 15px;
+            border-top: 1px solid #f1f5f9;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .card-actions form {
+            margin: 0;
+        }
+
+        .btn-action {
+            display: block;
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .btn-view {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+        }
+        .btn-view:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .btn-edit {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-edit:hover {
+            background: #2563eb;
+        }
+
+        .btn-status {
+            background: #f59e0b;
+            color: white;
+        }
+        .btn-status:hover {
+            background: #d97706;
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+
+        .empty {
+            text-align: center;
+            background: white;
+            padding: 50px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .empty h2 {
+            color: #334155;
+            margin-bottom: 10px;
+        }
+
+        .empty p {
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+
+        .btn-publish {
+            display: inline-block;
+            background: #16a34a;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn-publish:hover {
+            background: #15803d;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+    <div class="navbar">
+        <h2>🏡 My Lands</h2>
+        <div>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/sell-land">Sell Land</a>
+            <a href="/lands">All Lands</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>{{ message }}</span>
+                            <button type="button" class="alert-close" onclick="this.parentElement.remove();">&times;</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="page-header">
+            <h1>🏡 My Published Lands</h1>
+            <a href="/sell-land" class="btn-publish">+ Publish New Land</a>
+        </div>
+
+        {% if lands %}
+
+        <div class="land-grid">
+
+            {% for land in lands %}
+
+            <div class="land-card">
+
+                {% if land.image %}
+                    <img src="{{ url_for('static', filename='uploads/' + land.image) }}" alt="{{ land.title }}">
+                {% else %}
+                    <div class="land-card-no-img">📷 No Image</div>
+                {% endif %}
+
+                <div class="land-content">
+
+                    <!-- Status Badge -->
+                    <span class="status-badge {% if land.status == 'Available' %}status-available{% else %}status-sold{% endif %}">
+                        {% if land.status == 'Available' %}🟢 Available{% else %}🔴 Sold Out{% endif %}
+                    </span>
+
+                    <h2>{{ land.title }}</h2>
+
+                    <p>📍 <strong>Location:</strong> {{ land.location }}</p>
+                    <p>📐 <strong>Area:</strong> {{ land.area }}</p>
+                    <p class="price">₹ {{ "{:,.0f}".format(land.price|float) if land.price is defined else land.price }}</p>
+
+                    {% if land.description %}
+                        <p style="font-size: 13px; color: #64748b; line-height: 1.4;">
+                            {{ land.description[:100] }}{% if land.description|length > 100 %}...{% endif %}
+                        </p>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="card-actions">
+                        <a href="/land/{{ land.id }}" class="btn-action btn-view">👁️ View</a>
+                        <a href="/edit-land/{{ land.id }}" class="btn-action btn-edit">✏️ Edit</a>
+                        
+                        <!-- Toggle Status Form -->
+                        <form method="POST" action="/toggle-status/{{ land.id }}">
+                            <button type="submit" class="btn-action btn-status" title="Switch status">
+                                {% if land.status == 'Available' %}Mark Sold{% else %}Mark Available{% endif %}
+                            </button>
+                        </form>
+
+                        <!-- Delete Form -->
+                        <form method="POST" action="/delete-land/{{ land.id }}" onsubmit="return confirm('Are you sure you want to permanently delete this listing?');">
+                            <button type="submit" class="btn-action btn-delete">🗑️ Delete</button>
+                        </form>
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="empty">
+            <h2>😔 No Land Published Yet</h2>
+            <p>You have not published any land listings yet.</p>
+            <a href="/sell-land" class="btn-publish">+ Publish Your First Land</a>
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

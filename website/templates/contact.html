@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - MyWebsite Land Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f8f6;
+            color: #222;
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* ================= NAVBAR ================= */
+        .navbar {
+            width: 100%;
+            min-height: 70px;
+            padding: 15px 6%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #176b3a;
+        }
+
+        .logo span {
+            color: #28a745;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: #333;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #28a745;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .login-btn {
+            background: #176b3a;
+            color: white;
+            padding: 9px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .login-btn:hover {
+            background: #12532d;
+        }
+
+        .register-nav-btn {
+            background: #28a745;
+            color: white;
+            padding: 9px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            padding: 9px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        /* ================= HERO BANNER ================= */
+        .contact-hero {
+            background: linear-gradient(rgba(10, 60, 25, 0.85), rgba(8, 40, 18, 0.85)),
+                        url("{{ url_for('static', filename='land.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            padding: 90px 20px;
+        }
+
+        .contact-hero h1 {
+            font-size: 46px;
+            margin-bottom: 18px;
+            font-weight: 800;
+        }
+
+        .contact-hero h1 span {
+            color: #7cff9b;
+        }
+
+        .contact-hero p {
+            font-size: 19px;
+            max-width: 750px;
+            margin: 0 auto;
+            color: #e2e8f0;
+        }
+
+        /* ================= MAIN CONTAINER ================= */
+        .contact-container {
+            width: 90%;
+            max-width: 1150px;
+            margin: 50px auto;
+        }
+
+        .contact-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 40px;
+        }
+
+        /* ================= CONTACT INFO CARDS ================= */
+        .contact-info-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .info-card {
+            background: white;
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            border: 1px solid #eef2f6;
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+            transition: transform 0.2s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .info-card-icon {
+            width: 50px;
+            height: 50px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .info-card-text h4 {
+            font-size: 17px;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .info-card-text p,
+        .info-card-text a {
+            color: #475569;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .info-card-text a {
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+        .info-card-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Quick Action Buttons */
+        .quick-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .btn-call {
+            background: #0284c7;
+            color: white;
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .btn-call:hover {
+            background: #0369a1;
+            transform: translateY(-2px);
+        }
+
+        .btn-whatsapp {
+            background: #25d366;
+            color: white;
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .btn-whatsapp:hover {
+            background: #128c7e;
+            transform: translateY(-2px);
+        }
+
+        /* ================= CONTACT FORM ================= */
+        .contact-form-panel {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #eef2f6;
+        }
+
+        .contact-form-panel h3 {
+            font-size: 26px;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .contact-form-panel p {
+            color: #64748b;
+            margin-bottom: 25px;
+            font-size: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #334155;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+            background: #f8fafc;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #16a34a;
+            background: white;
+        }
+
+        .btn-send {
+            width: 100%;
+            background: #16a34a;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-send:hover {
+            background: #15803d;
+            transform: translateY(-2px);
+        }
+
+        /* Success banner for JS */
+        .form-alert {
+            display: none;
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            font-weight: 500;
+        }
+
+        /* ================= FOOTER ================= */
+        footer {
+            background: #1e293b;
+            color: #94a3b8;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 60px;
+        }
+
+        @media (max-width: 850px) {
+            .contact-layout {
+                grid-template-columns: 1fr;
+            }
+            .contact-hero h1 {
+                font-size: 34px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+    <nav class="navbar">
+        <div class="logo">
+            <span>🏡</span> MyWebsite
+        </div>
+
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/lands">Buy Land</a>
+            <a href="/about">About</a>
+            <a href="/services">Services</a>
+            <a href="/contact" class="active">Contact</a>
+        </div>
+
+        <div class="user-menu">
+            {% if session.get("user_id") %}
+                <a href="/dashboard" class="login-btn">Dashboard</a>
+                <a href="/logout" class="logout-btn">Logout</a>
+            {% else %}
+                <a href="/login" class="login-btn">Login</a>
+                <a href="/register" class="register-nav-btn">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- ================= HERO ================= -->
+    <header class="contact-hero">
+        <h1>Contact <span>Our Team</span></h1>
+        <p>Have questions about buying or selling land? Reach out to us directly via Call, WhatsApp, or message form.</p>
+    </header>
+
+    <!-- ================= CONTENT ================= -->
+    <div class="contact-container">
+
+        <div class="contact-layout">
+
+            <!-- LEFT: INFO PANEL -->
+            <div class="contact-info-panel">
+
+                <!-- Phone Card -->
+                <div class="info-card">
+                    <div class="info-card-icon">📞</div>
+                    <div class="info-card-text">
+                        <h4>Phone Number</h4>
+                        <p>Call us directly for property inquiries & assistance:</p>
+                        <a href="tel:+919137508011">+91 9137508011</a>
+                    </div>
+                </div>
+
+                <!-- WhatsApp Card -->
+                <div class="info-card">
+                    <div class="info-card-icon">💬</div>
+                    <div class="info-card-text">
+                        <h4>WhatsApp Support</h4>
+                        <p>Instant chat support on WhatsApp:</p>
+                        <a href="https://wa.me/919137508011?text=Hello%2C%20I%20have%20an%20inquiry%20regarding%20land%20listings%20on%20MyWebsite." target="_blank">
+                            +91 9137508011 (Click to Chat)
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Email Card -->
+                <div class="info-card">
+                    <div class="info-card-icon">📧</div>
+                    <div class="info-card-text">
+                        <h4>Email Address</h4>
+                        <p>Send us an email anytime:</p>
+                        <a href="mailto:support@mywebsite.com">support@mywebsite.com</a>
+                    </div>
+                </div>
+
+                <!-- Location Card -->
+                <div class="info-card">
+                    <div class="info-card-icon">📍</div>
+                    <div class="info-card-text">
+                        <h4>Operating Region</h4>
+                        <p>Serving buyers & sellers across India</p>
+                    </div>
+                </div>
+
+                <!-- Operating Hours -->
+                <div class="info-card">
+                    <div class="info-card-icon">⏰</div>
+                    <div class="info-card-text">
+                        <h4>Working Hours</h4>
+                        <p>Monday - Saturday: 9:00 AM - 8:00 PM<br>Sunday: Closed</p>
+                    </div>
+                </div>
+
+                <!-- Quick Action Buttons -->
+                <div class="quick-actions">
+                    <a href="tel:+919137508011" class="btn-call">
+                        📞 Call Now
+                    </a>
+                    <a href="https://wa.me/919137508011?text=Hello%2C%20I%20have%20an%20inquiry%20regarding%20land%20listings%20on%20MyWebsite." target="_blank" class="btn-whatsapp">
+                        💬 WhatsApp Chat
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- RIGHT: CONTACT FORM -->
+            <div class="contact-form-panel">
+                <h3>Send Us a Message</h3>
+                <p>Fill out the form below and we will get back to you promptly.</p>
+
+                <div id="formAlert" class="form-alert">
+                    ✅ Thank you! Your message has been received. We will contact you soon.
+                </div>
+
+                <form id="contactForm" onsubmit="handleFormSubmit(event)">
+                    
+                    <div class="form-group">
+                        <label>Your Name *</label>
+                        <input type="text" name="name" placeholder="Enter your full name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mobile Number *</label>
+                        <input type="tel" name="mobile" placeholder="10-digit mobile number" maxlength="10" pattern="[0-9]{10}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email Address *</label>
+                        <input type="email" name="email" placeholder="Enter your email address" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Inquiry Type</label>
+                        <select name="subject">
+                            <option value="Buying Land">I want to Buy Land</option>
+                            <option value="Selling Land">I want to Sell Land</option>
+                            <option value="Site Visit / Location">Site Visit & Location Assistance</option>
+                            <option value="General Inquiry">General Inquiry</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Message *</label>
+                        <textarea name="message" rows="4" placeholder="Tell us more about your inquiry or property details..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-send">
+                        ✉️ Send Message
+                    </button>
+
+                </form>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ================= FORM JS ================= -->
+    <script>
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        document.getElementById("formAlert").style.display = "block";
+        document.getElementById("contactForm").reset();
+        window.scrollTo({ top: document.getElementById("formAlert").offsetTop - 100, behavior: 'smooth' });
+    }
+    </script>
+
+    <!-- ================= FOOTER ================= -->
+    <footer>
+        <p>© 2026 MyWebsite Land Portal. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

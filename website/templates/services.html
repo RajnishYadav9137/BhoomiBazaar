@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Services - MyWebsite Land Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f8f6;
+            color: #222;
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* ================= NAVBAR ================= */
+        .navbar {
+            width: 100%;
+            min-height: 70px;
+            padding: 15px 6%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #176b3a;
+        }
+
+        .logo span {
+            color: #28a745;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: #333;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #28a745;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .login-btn {
+            background: #176b3a;
+            color: white;
+            padding: 9px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .login-btn:hover {
+            background: #12532d;
+        }
+
+        .register-nav-btn {
+            background: #28a745;
+            color: white;
+            padding: 9px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            padding: 9px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        /* ================= HERO BANNER ================= */
+        .services-hero {
+            background: linear-gradient(rgba(10, 60, 25, 0.85), rgba(8, 40, 18, 0.85)),
+                        url("{{ url_for('static', filename='land.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            padding: 90px 20px;
+        }
+
+        .services-hero h1 {
+            font-size: 46px;
+            margin-bottom: 18px;
+            font-weight: 800;
+        }
+
+        .services-hero h1 span {
+            color: #7cff9b;
+        }
+
+        .services-hero p {
+            font-size: 19px;
+            max-width: 750px;
+            margin: 0 auto;
+            color: #e2e8f0;
+        }
+
+        /* ================= MAIN CONTAINER ================= */
+        .services-container {
+            width: 90%;
+            max-width: 1150px;
+            margin: 50px auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 45px;
+        }
+
+        .section-tag {
+            display: inline-block;
+            background: #dcfce7;
+            color: #15803d;
+            font-weight: bold;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .section-header h2 {
+            font-size: 34px;
+            color: #1e293b;
+        }
+
+        /* ================= SERVICE CARDS ================= */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 60px;
+        }
+
+        .service-card {
+            background: white;
+            padding: 35px 30px;
+            border-radius: 14px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            border: 1px solid #eef2f6;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .service-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .service-icon {
+            width: 60px;
+            height: 60px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .service-card h3 {
+            font-size: 21px;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+
+        .service-card p {
+            color: #64748b;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .service-features {
+            list-style: none;
+            margin-top: auto;
+            padding-top: 15px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .service-features li {
+            font-size: 14px;
+            color: #475569;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .service-features li::before {
+            content: "✓";
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        /* ================= CTA BANNER ================= */
+        .cta-banner {
+            background: linear-gradient(135deg, #176b3a, #28a745);
+            color: white;
+            border-radius: 16px;
+            padding: 50px 30px;
+            text-align: center;
+        }
+
+        .cta-banner h2 {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .cta-banner p {
+            font-size: 18px;
+            margin-bottom: 28px;
+            opacity: 0.95;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-white {
+            background: white;
+            color: #176b3a;
+            padding: 13px 28px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+
+        .btn-white:hover {
+            background: #f1f5f9;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            padding: 11px 26px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* ================= FOOTER ================= */
+        footer {
+            background: #1e293b;
+            color: #94a3b8;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 60px;
+        }
+
+        @media (max-width: 768px) {
+            .services-hero h1 {
+                font-size: 34px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+    <nav class="navbar">
+        <div class="logo">
+            <span>🏡</span> MyWebsite
+        </div>
+
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/lands">Buy Land</a>
+            <a href="/about">About</a>
+            <a href="/services" class="active">Services</a>
+            <a href="/contact">Contact</a>
+        </div>
+
+        <div class="user-menu">
+            {% if session.get("user_id") %}
+                <a href="/dashboard" class="login-btn">Dashboard</a>
+                <a href="/logout" class="logout-btn">Logout</a>
+            {% else %}
+                <a href="/login" class="login-btn">Login</a>
+                <a href="/register" class="register-nav-btn">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- ================= HERO ================= -->
+    <header class="services-hero">
+        <h1>Our <span>Real Estate & Land</span> Services</h1>
+        <p>Comprehensive solutions designed for landowners, property buyers, and real estate investors across India.</p>
+    </header>
+
+    <!-- ================= CONTENT ================= -->
+    <div class="services-container">
+
+        <div class="section-header">
+            <span class="section-tag">WHAT WE OFFER</span>
+            <h2>Complete Land Buying & Selling Solutions</h2>
+        </div>
+
+        <!-- SERVICES GRID -->
+        <div class="services-grid">
+
+            <!-- Service 1 -->
+            <div class="service-card">
+                <div class="service-icon">🏡</div>
+                <h3>Land Selling & Listings</h3>
+                <p>Publish your property to thousands of prospective buyers with photo gallery, detailed area measurements, and custom pricing.</p>
+                <ul class="service-features">
+                    <li>Free and unlimited listing duration</li>
+                    <li>High-resolution photo uploads</li>
+                    <li>Instant listing activation</li>
+                </ul>
+            </div>
+
+            <!-- Service 2 -->
+            <div class="service-card">
+                <div class="service-icon">🔍</div>
+                <h3>Land Discovery & Buying</h3>
+                <p>Discover agricultural, residential, commercial, and industrial plots with full transparency in pricing and seller contacts.</p>
+                <ul class="service-features">
+                    <li>Verified seller information</li>
+                    <li>Clear price tags in Rupees (₹)</li>
+                    <li>Detailed descriptions & measurements</li>
+                </ul>
+            </div>
+
+            <!-- Service 3 -->
+            <div class="service-card">
+                <div class="service-icon">📍</div>
+                <h3>GPS & Map Navigation</h3>
+                <p>Pinpoint exact locations with GPS coordinates and open direct turn-by-turn Google Maps navigation to inspect properties on-site.</p>
+                <ul class="service-features">
+                    <li>1-click GPS location capture</li>
+                    <li>Interactive OpenStreetMap & Leaflet</li>
+                    <li>Direct Google Maps directions</li>
+                </ul>
+            </div>
+
+            <!-- Service 4 -->
+            <div class="service-card">
+                <div class="service-icon">💬</div>
+                <h3>Direct WhatsApp & Call</h3>
+                <p>Connect with sellers or interested buyers instantly without delays or broker mediation via phone and pre-filled WhatsApp chats.</p>
+                <ul class="service-features">
+                    <li>Instant 1-click WhatsApp messaging</li>
+                    <li>Direct phone call dialer</li>
+                    <li>Fast response from landowners</li>
+                </ul>
+            </div>
+
+            <!-- Service 5 -->
+            <div class="service-card">
+                <div class="service-icon">⚙️</div>
+                <h3>Seller Dashboard & Controls</h3>
+                <p>Easily edit your land details, update prices, change photos, or mark listings as "Sold Out" from your personalized dashboard.</p>
+                <ul class="service-features">
+                    <li>Edit titles, prices, descriptions</li>
+                    <li>1-click "Sold / Available" status toggle</li>
+                    <li>Permanent listing deletion with photo cleanup</li>
+                </ul>
+            </div>
+
+            <!-- Service 6 -->
+            <div class="service-card">
+                <div class="service-icon">🔒</div>
+                <h3>Zero Brokerage Platform</h3>
+                <p>We provide a 100% direct marketplace ensuring no middlemen take hefty commissions from your hard-earned property deals.</p>
+                <ul class="service-features">
+                    <li>0% commission fees</li>
+                    <li>Direct price negotiations</li>
+                    <li>100% transparent communication</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- CTA BANNER -->
+        <div class="cta-banner">
+            <h2>Ready to Get Started?</h2>
+            <p>Publish your property or discover your next plot today on MyWebsite.</p>
+            <div class="cta-buttons">
+                <a href="/sell-land" class="btn-white">🏡 Sell Your Land</a>
+                <a href="/lands" class="btn-outline">🔍 Explore Listings</a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= FOOTER ================= -->
+    <footer>
+        <p>© 2026 MyWebsite Land Portal. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

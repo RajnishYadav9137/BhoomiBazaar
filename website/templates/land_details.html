@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>{{ land.title }} - Land Details</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- Leaflet CSS -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 950px;
+            margin: 40px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #222;
+            margin-bottom: 20px;
+        }
+
+        .land-image {
+            width: 100%;
+            max-height: 450px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info {
+            margin: 14px 0;
+            font-size: 18px;
+            line-height: 1.5;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .price {
+            font-size: 25px;
+            font-weight: bold;
+            color: green;
+        }
+
+        .status {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 5px;
+        }
+
+        /* ================= MAP ================= */
+
+        .map-title {
+            margin-top: 30px;
+            margin-bottom: 12px;
+            color: #222;
+        }
+
+        #map {
+            width: 100%;
+            height: 400px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .coordinates {
+            margin-top: 10px;
+            font-size: 15px;
+            color: #555;
+        }
+
+        /* ================= BUTTONS ================= */
+
+        .buttons {
+            margin-top: 25px;
+        }
+
+        .button {
+            display: inline-block;
+            text-decoration: none;
+            background: #007bff;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 6px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .button:hover {
+            background: #0056b3;
+        }
+
+        .back {
+            background: #555;
+        }
+
+        .back:hover {
+            background: #333;
+        }
+
+        .direction {
+            background: #28a745;
+        }
+
+        .direction:hover {
+            background: #1e7e34;
+        }
+
+        .whatsapp {
+            background: #25d366 !important;
+            font-weight: 600;
+        }
+
+        .whatsapp:hover {
+            background: #128c7e !important;
+        }
+
+        .call {
+            background: #0284c7 !important;
+            font-weight: 600;
+        }
+
+        .call:hover {
+            background: #0369a1 !important;
+        }
+
+        /* ================= MOBILE ================= */
+
+        @media (max-width: 600px) {
+
+            .container {
+                width: 95%;
+                margin: 20px auto;
+                padding: 18px;
+            }
+
+            .info {
+                font-size: 16px;
+            }
+
+            .price {
+                font-size: 22px;
+            }
+
+            #map {
+                height: 300px;
+            }
+
+            .button {
+                display: block;
+                text-align: center;
+                margin-right: 0;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+    <!-- ================= TITLE ================= -->
+
+    <h1>
+        🏡 {{ land.title }}
+    </h1>
+
+
+    <!-- ================= LAND IMAGE ================= -->
+
+    {% if land.image %}
+
+        <img
+            src="{{ url_for('static', filename='uploads/' + land.image) }}"
+            class="land-image"
+            alt="Land Image"
+        >
+
+    {% endif %}
+
+
+    <!-- ================= LAND INFORMATION ================= -->
+
+    <div class="info">
+
+        <span class="label">
+            📍 Location:
+        </span>
+
+        {{ land.location }}
+
+    </div>
+
+
+    <div class="info">
+
+        <span class="label">
+            📐 Area:
+        </span>
+
+        {{ land.area }}
+
+    </div>
+
+
+    <div class="info price">
+
+        💰 Price: ₹{{ land.price }}
+
+    </div>
+
+
+    <div class="info">
+
+        <span class="label">
+            📝 Description:
+        </span>
+
+        <br>
+
+        {{ land.description }}
+
+    </div>
+
+
+    <!-- ================= STATUS ================= -->
+
+    <div style="margin: 15px 0;">
+        <span class="label" style="font-size: 16px;">📌 Status:</span>
+        {% if land.status == 'Available' %}
+            <span style="display: inline-block; background: #dcfce7; color: #15803d; border: 1px solid #86efac; font-weight: bold; padding: 6px 14px; border-radius: 20px; font-size: 14px;">
+                🟢 Available for Sale
+            </span>
+        {% else %}
+            <span style="display: inline-block; background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-weight: bold; padding: 6px 14px; border-radius: 20px; font-size: 14px;">
+                🔴 Sold Out
+            </span>
+        {% endif %}
+    </div>
+
+
+    <!-- ================= SELLER CARD & CONTACT ================= -->
+
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 25px 0;">
+
+        <h3 style="margin-top: 0; margin-bottom: 15px; color: #1e293b; font-size: 18px; display: flex; align-items: center; gap: 8px;">
+            👤 Seller Information
+        </h3>
+
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+            {% if land.seller_profile_pic %}
+                <img
+                    src="{{ url_for('static', filename='uploads/' + land.seller_profile_pic) }}"
+                    alt="{{ land.seller_name }}"
+                    style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2.5px solid #7c5cff; box-shadow: 0 2px 10px rgba(124,92,255,0.25);"
+                >
+            {% else %}
+                <div style="width: 60px; height: 60px; border-radius: 50%; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: bold;">
+                    👤
+                </div>
+            {% endif %}
+
+            <div>
+                <div style="font-size: 18px; font-weight: bold; color: #1e293b;">
+                    {{ land.seller_name }}
+                </div>
+                <div style="font-size: 13px; color: #64748b;">
+                    Property Owner & Verified Seller
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 18px;">
+            
+            <!-- SELLER EMAIL -->
+            <div style="background: white; padding: 12px 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <div style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase;">
+                    📧 Email Address
+                </div>
+                <div style="font-size: 15px; margin-top: 4px; word-break: break-all;">
+                    {% if land.seller_email %}
+                        <a href="mailto:{{ land.seller_email }}?subject=Inquiry%20regarding%20{{ land.title }}" style="color: #2563eb; text-decoration: none; font-weight: 600;">
+                            {{ land.seller_email }}
+                        </a>
+                    {% else %}
+                        <span style="color: #94a3b8;">Not Available</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- SELLER MOBILE -->
+            <div style="background: white; padding: 12px 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <div style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase;">
+                    📞 Mobile Phone
+                </div>
+                <div style="font-size: 15px; margin-top: 4px;">
+                    {% if land.seller_mobile %}
+                        <a href="tel:{{ land.seller_mobile }}" style="color: #0284c7; text-decoration: none; font-weight: 600;">
+                            {{ land.seller_mobile }}
+                        </a>
+                    {% else %}
+                        <span style="color: #94a3b8;">Not Provided</span>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- CONTACT ACTION BUTTONS -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            {% if land.seller_mobile %}
+                <a class="button call" href="tel:{{ land.seller_mobile }}" style="margin: 0; padding: 10px 18px; display: inline-flex; align-items: center; gap: 6px;">
+                    📞 Call Seller
+                </a>
+                <a class="button whatsapp" target="_blank" href="https://wa.me/91{{ land.seller_mobile }}?text=Hello%20{{ land.seller_name }}%2C%20I%20saw%20your%20land%20listing%20'{{ land.title }}'%20on%20MyWebsite%20and%20I%20am%20interested." style="margin: 0; padding: 10px 18px; display: inline-flex; align-items: center; gap: 6px;">
+                    💬 Chat on WhatsApp
+                </a>
+            {% endif %}
+
+            {% if land.seller_email %}
+                <a class="button" href="mailto:{{ land.seller_email }}?subject=Inquiry%20regarding%20{{ land.title }}" style="background: #2563eb; margin: 0; padding: 10px 18px; display: inline-flex; align-items: center; gap: 6px;">
+                    📧 Send Email
+                </a>
+            {% endif %}
+
+            <!-- WISHLIST TOGGLE BUTTON -->
+            <a class="button" href="/toggle-wishlist/{{ land.id }}" style="background: {% if is_wishlisted %}#e11d48{% else %}#475569{% endif %}; margin: 0; padding: 10px 18px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
+                {% if is_wishlisted %}❤️ In Wishlist (Saved){% else %}🤍 Add to Wishlist{% endif %}
+            </a>
+        </div>
+
+    </div>
+
+    <!-- SELLER OWNER CONTROLS (IF LOGGED IN AS SELLER) -->
+    {% if session.get('user_id') == land.seller_id %}
+    <div style="background: #fefce8; border: 1px solid #fef08a; border-radius: 10px; padding: 15px; margin: 20px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <span style="color: #854d0e; font-weight: 600; font-size: 14px;">
+            👑 You are the owner of this listing
+        </span>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <form method="POST" action="/toggle-status/{{ land.id }}" style="display: inline; margin: 0;">
+                <button type="submit" style="background: #f59e0b; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                    🔄 Toggle Status ({% if land.status == 'Available' %}Mark Sold{% else %}Mark Available{% endif %})
+                </button>
+            </form>
+            <a href="/edit-land/{{ land.id }}" style="background: #3b82f6; color: white; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; display: inline-block;">
+                ✏️ Edit Listing
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+
+    <!-- ================================================= -->
+    <!-- ================= MAP SECTION =================== -->
+    <!-- ================================================= -->
+
+    {% if land.latitude is not none and land.longitude is not none %}
+
+        <h2 class="map-title">
+            🗺️ Land Location
+        </h2>
+
+
+        <div id="map"></div>
+
+
+        <div class="coordinates">
+
+            📍 Latitude: {{ land.latitude }} | 📍 Longitude: {{ land.longitude }}
+
+        </div>
+
+        <!-- LIVE GPS DISTANCE & DIRECTIONS -->
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 15px; margin: 15px 0;">
+            <h3 style="font-size: 16px; color: #166534; margin-bottom: 8px;">
+                🛰️ Live GPS Distance & Directions
+            </h3>
+            
+            <p style="font-size: 13px; color: #475569; margin-bottom: 12px;">
+                Click below to calculate your live distance from this land and view driving directions.
+            </p>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button
+                    type="button"
+                    class="button direction"
+                    id="trackBtn"
+                    onclick="trackLiveDistance()"
+                    style="border: none; cursor: pointer; font-weight: bold; padding: 10px 16px;">
+                    📍 Track My Live Distance & Route
+                </button>
+
+                <a
+                    id="gmapsNavBtn"
+                    class="button direction"
+                    style="background: #1e40af; display: inline-block;"
+                    target="_blank"
+                    href="https://www.google.com/maps/dir/?api=1&destination={{ land.latitude }},{{ land.longitude }}"
+                >
+                    🧭 Open in Google Maps
+                </a>
+            </div>
+
+            <!-- DISTANCE RESULT BADGE -->
+            <div id="distanceBadge" style="display:none; margin-top: 12px; padding: 10px 14px; background: white; border-radius: 8px; border: 1px solid #86efac; font-size: 14px; color: #15803d; font-weight: bold;">
+            </div>
+        </div>
+
+    {% else %}
+
+        <div class="info">
+
+            ⚠️ <strong>Location map coordinates not provided.</strong><br>
+            The seller has not saved GPS coordinates for this listing.
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- ================= BUTTONS ================= -->
+
+    <div class="buttons">
+
+        <a
+            href="/my-lands"
+            class="button back"
+        >
+            ← Back to My Lands
+        </a>
+
+        <a
+            href="/lands"
+            class="button"
+        >
+            View All Lands
+        </a>
+
+        <a
+            href="/dashboard"
+            class="button"
+        >
+            🏠 Dashboard
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- ================= LEAFLET JS ==================== -->
+<!-- ================================================= -->
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+{% if land.latitude is not none and land.longitude is not none %}
+
+<script>
+    const landLat = {{ land.latitude }};
+    const landLng = {{ land.longitude }};
+
+    // Initialize Map
+    const map = L.map('map').setView([landLat, landLng], 15);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Custom Land Icon
+    const landMarker = L.marker([landLat, landLng]).addTo(map);
+    landMarker.bindPopup(
+        `<b>🏡 {{ land.title }}</b><br>
+         📍 {{ land.location }}<br>
+         💰 ₹{{ land.price }}`
+    ).openPopup();
+
+    let userMarker = null;
+    let routeLine = null;
+
+    // Haversine formula for calculating distance between 2 coordinates
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Radius of Earth in KM
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    function trackLiveDistance() {
+        const badge = document.getElementById("distanceBadge");
+        const btn = document.getElementById("trackBtn");
+
+        if (!navigator.geolocation) {
+            badge.style.display = "block";
+            badge.style.color = "#b91c1c";
+            badge.innerText = "❌ Geolocation is not supported by your browser.";
+            return;
+        }
+
+        btn.disabled = true;
+        badge.style.display = "block";
+        badge.style.color = "#1d4ed8";
+        badge.innerText = "📡 Fetching your live GPS location...";
+
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                btn.disabled = false;
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+                const accuracy = Math.round(position.coords.accuracy || 5);
+
+                const distanceKm = calculateDistance(userLat, userLng, landLat, landLng);
+                let distanceText = "";
+                if (distanceKm < 1) {
+                    distanceText = `${Math.round(distanceKm * 1000)} meters`;
+                } else {
+                    distanceText = `${distanceKm.toFixed(2)} km`;
+                }
+
+                badge.style.color = "#15803d";
+                badge.innerHTML = `📍 <strong>You are ${distanceText} away from this land</strong> (GPS Accuracy: ±${accuracy}m)`;
+
+                // Update Google Maps navigation link
+                const navBtn = document.getElementById("gmapsNavBtn");
+                navBtn.href = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${landLat},${landLng}`;
+
+                // Add or update user marker on map
+                if (userMarker) {
+                    userMarker.setLatLng([userLat, userLng]);
+                } else {
+                    userMarker = L.circleMarker([userLat, userLng], {
+                        radius: 9,
+                        color: '#2563eb',
+                        fillColor: '#3b82f6',
+                        fillOpacity: 0.9,
+                        weight: 3
+                    }).addTo(map);
+                    userMarker.bindPopup("<b>👤 You Are Here (Live Location)</b>").openPopup();
+                }
+
+                // Draw connecting route line
+                if (routeLine) {
+                    map.removeLayer(routeLine);
+                }
+                routeLine = L.polyline([[userLat, userLng], [landLat, landLng]], {
+                    color: '#16a34a',
+                    weight: 4,
+                    dashArray: '8, 8',
+                    opacity: 0.85
+                }).addTo(map);
+
+                // Fit map bounds to show both buyer and land
+                map.fitBounds([[userLat, userLng], [landLat, landLng]], { padding: [50, 50] });
+            },
+            function(error) {
+                btn.disabled = false;
+                badge.style.color = "#b91c1c";
+                let msg = "❌ Unable to capture your location.";
+                if (error.code === error.PERMISSION_DENIED) {
+                    msg = "❌ Location permission denied. Please allow browser location access.";
+                }
+                badge.innerText = msg;
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    }
+</script>
+
+{% endif %}
+
+
+</body>
+
+</html>

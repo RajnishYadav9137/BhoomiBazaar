@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - MyWebsite</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">
+            <span>✦</span> MyWebsite
+        </div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/services">Services</a>
+            <a href="/contact">Contact</a>
+        </div>
+        <a href="/login" class="login-btn">Login</a>
+    </nav>
+
+    <!-- Register Section -->
+    <section class="register-section">
+        <div class="register-box">
+            <div class="register-icon">✨</div>
+            <h1>Create Account</h1>
+            <p>Join MyWebsite and get started today</p>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-container">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                <span>{{ message }}</span>
+                                <button type="button" class="alert-close" onclick="this.parentElement.remove();">&times;</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="/register">
+                <input
+                    type="text"
+                    name="name"
+                    value="{{ name or '' }}"
+                    placeholder="Full Name"
+                    required
+                >
+
+                <input
+                    type="tel"
+                    name="mobile"
+                    value="{{ mobile or '' }}"
+                    placeholder="10-digit Mobile Number"
+                    maxlength="10"
+                    pattern="[0-9]{10}"
+                    required
+                >
+
+                <input
+                    type="email"
+                    name="email"
+                    value="{{ email or '' }}"
+                    placeholder="Email Address"
+                    required
+                >
+
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Password (min 6 characters)"
+                    minlength="6"
+                    required
+                >
+
+                <input
+                    type="password"
+                    name="confirm_password"
+                    placeholder="Confirm Password"
+                    minlength="6"
+                    required
+                >
+
+                <button type="submit" class="primary-btn register-btn">
+                    Create Account
+                </button>
+            </form>
+
+            <p class="login-text">
+                Already have an account?
+                <a href="/login">Login</a>
+            </p>
+        </div>
+    </section>
+
+</body>
+</html>

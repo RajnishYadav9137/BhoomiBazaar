@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Land - {{ land.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <style>
+        #mapPicker {
+            width: 100%;
+            height: 300px;
+            border-radius: 10px;
+            border: 2px solid #28a745;
+            margin: 12px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .gps-status-badge {
+            display: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .gps-success {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+            display: block;
+        }
+
+        .gps-loading {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            display: block;
+        }
+
+        .gps-error {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            display: block;
+        }
+
+        .coords-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ================= NAVIGATION ================= -->
+    <nav class="navbar">
+        <div class="logo">
+            <span>🏡</span> MyWebsite
+        </div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/lands">Buy Land</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/my-lands">My Lands</a>
+            <a href="/profile">Profile</a>
+        </div>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </nav>
+
+    <!-- ================= EDIT LAND SECTION ================= -->
+    <section class="login-section">
+        <div class="login-box sell-land-box">
+            <div class="profile-icon">✏️</div>
+            <h1>Edit Land Details</h1>
+            <p>Update information & live GPS coordinates for this listing.</p>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-container">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                <span>{{ message }}</span>
+                                <button type="button" class="alert-close" onclick="this.parentElement.remove();">&times;</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="/edit-land/{{ land.id }}" enctype="multipart/form-data">
+                
+                <!-- LAND TITLE -->
+                <label style="display:block; text-align:left; margin-bottom:5px; font-weight:600; color:#333;">Land Title</label>
+                <input
+                    type="text"
+                    name="title"
+                    value="{{ land.title }}"
+                    placeholder="Land Title"
+                    required
+                >
+
+                <!-- LOCATION -->
+                <label style="display:block; text-align:left; margin-bottom:5px; font-weight:600; color:#333;">Location Address</label>
+                <input
+                    type="text"
+                    name="location"
+                    id="locationName"
+                    value="{{ land.location }}"
+                    placeholder="Land Location"
+                    required
+                >
+
+                <!-- AREA -->
+                <label style="display:block; text-align:left; margin-bottom:5px; font-weight:600; color:#333;">Area</label>
+                <input
+                    type="text"
+                    name="area"
+                    value="{{ land.area }}"
+                    placeholder="Land Area (e.g. 1200 sq.ft)"
+                    required
+                >
+
+                <!-- PRICE -->
+                <label style="display:block; text-align:left; margin-bottom:5px; font-weight:600; color:#333;">Price (₹)</label>
+                <input
+                    type="number"
+                    name="price"
+                    value="{{ land.price|int if land.price is defined else '' }}"
+                    placeholder="Price (₹)"
+                    required
+                >
+
+                <!-- STATUS DROPDOWN -->
+                <label style="display:block; text-align:left; margin-bottom:5px; font-weight:600; color:#333;">Listing Status</label>
+                <select name="status" class="form-select" style="width:100%; padding:12px 15px; margin-bottom:18px; border-radius:8px; border:1px solid #ccc; font-size:15px; background:white;">
+                    <option value="Available" {% if land.status == 'Available' %}selected{% endif %}>🟢 Available for Sale</option>
+                    <option value="Sold" {% if land.status == 'Sold' %}selected{% endif %}>🔴 Sold Out</option>
+                </select>
+
+                <!-- DESCRIPTION -->
+                <label style="display:block; text-align:left; margin-bottom:5px; font-weight:600; color:#333;">Description</label>
+                <textarea
+                    name="description"
+                    placeholder="Describe your land..."
+                    rows="4"
+                    required>{{ land.description }}</textarea>
+
+                <!-- CURRENT PHOTO PREVIEW & CHANGE PHOTO SECTION -->
+                <div class="photo-upload-container" style="background: #f8fafc; border: 2px dashed #94a3b8; border-radius: 12px; padding: 18px; margin: 18px 0; text-align: left;">
+                    
+                    <label style="display: block; font-weight: bold; color: #1e293b; font-size: 15px; margin-bottom: 4px;">
+                        📸 Land Photo (Current & Live Shoot / Change)
+                    </label>
+
+                    {% if land.image %}
+                    <div style="margin-bottom: 15px;">
+                        <span style="font-size: 12px; color: #64748b; font-weight: 600; display: block; margin-bottom: 6px;">Current Land Photo:</span>
+                        <img src="{{ url_for('static', filename='uploads/' + land.image) }}" 
+                             alt="Current Land Photo" 
+                             style="width: 100%; max-height: 180px; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1;">
+                    </div>
+                    {% endif %}
+
+                    <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">
+                        Nayi photo lene ke liye direct camera se shoot karein ya gallery se choose karein (Optional).
+                    </p>
+
+                    <!-- OPTION SWITCHER TABS -->
+                    <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                        <button type="button" id="tabCameraBtn" onclick="switchPhotoTab('camera')" style="flex: 1; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 13px; border: 1.5px solid #7c5cff; background: #7c5cff; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                            📸 Live Camera Shoot
+                        </button>
+                        <button type="button" id="tabGalleryBtn" onclick="switchPhotoTab('gallery')" style="flex: 1; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 13px; border: 1.5px solid #cbd5e1; background: white; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                            📁 Choose from Gallery
+                        </button>
+                    </div>
+
+                    <!-- PANEL 1: LIVE CAMERA SHOOT -->
+                    <div id="cameraShootPanel">
+                        <!-- Live Video Viewfinder -->
+                        <div id="cameraViewWrapper" style="position: relative; width: 100%; border-radius: 10px; overflow: hidden; background: #0f172a; text-align: center; margin-bottom: 10px;">
+                            <video id="cameraVideo" playsinline autoplay muted style="width: 100%; max-height: 320px; object-fit: cover; display: none;"></video>
+                            
+                            <!-- Camera Placeholder / Start Button -->
+                            <div id="cameraPlaceholder" style="padding: 30px 15px; color: #94a3b8;">
+                                <div style="font-size: 40px; margin-bottom: 8px;">📷</div>
+                                <p style="font-size: 13px; margin-bottom: 12px; color: #e2e8f0; font-weight: 500;">
+                                    Click below to start live camera viewfinder
+                                </p>
+                                <button type="button" onclick="startLiveCamera()" style="background: #16a34a; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(22,163,74,0.3);">
+                                    🟢 Open Live Camera
+                                </button>
+                            </div>
+
+                            <!-- Target overlay guidelines -->
+                            <div id="cameraOverlay" style="display: none; position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px; border: 2px dashed rgba(255,255,255,0.5); pointer-events: none; border-radius: 8px;"></div>
+                        </div>
+
+                        <!-- Camera Action Controls -->
+                        <div id="cameraActiveControls" style="display: none; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;">
+                            <button type="button" id="snapPhotoBtn" onclick="takeLiveSnapshot()" style="flex: 2; padding: 12px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(220,38,38,0.35);">
+                                ⚪ 📸 Shoot & Capture Photo
+                            </button>
+                            <button type="button" id="switchCamBtn" onclick="flipCameraDevice()" style="flex: 1; padding: 12px; background: #334155; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer;">
+                                🔄 Flip Cam
+                            </button>
+                            <button type="button" onclick="stopLiveCamera()" style="padding: 12px; background: #64748b; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer;">
+                                ✕ Close
+                            </button>
+                        </div>
+
+                        <!-- Mobile direct camera app launcher -->
+                        <div style="text-align: center; margin-top: 6px;">
+                            <label for="mobileDirectCameraInput" style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #2563eb; cursor: pointer; text-decoration: underline;">
+                                📱 Direct Phone Camera App Shoot
+                            </label>
+                            <input type="file" id="mobileDirectCameraInput" accept="image/*" capture="environment" style="display: none;" onchange="handleDirectCameraFile(this)">
+                        </div>
+                    </div>
+
+                    <!-- PANEL 2: GALLERY / FILE UPLOAD -->
+                    <div id="galleryUploadPanel" style="display: none;">
+                        <div style="border: 2px dashed #cbd5e1; border-radius: 10px; padding: 25px 15px; text-align: center; background: white; cursor: pointer;" onclick="document.getElementById('galleryFileInput').click()">
+                            <div style="font-size: 32px; margin-bottom: 6px;">📁</div>
+                            <p style="font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 4px;">
+                                Click to browse new photo from files / gallery
+                            </p>
+                            <span style="font-size: 12px; color: #64748b;">Supports JPG, JPEG, PNG, WEBP, GIF</span>
+                            <input type="file" id="galleryFileInput" accept="image/png, image/jpeg, image/jpg, image/webp, image/gif" style="display: none;" onchange="handleGalleryFile(this)">
+                        </div>
+                    </div>
+
+                    <!-- PHOTO PREVIEW AREA (Active once photo is chosen/shot) -->
+                    <div id="photoPreviewContainer" style="display: none; margin-top: 15px; background: white; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <span id="photoPreviewBadge" style="font-size: 12px; font-weight: bold; padding: 3px 10px; border-radius: 12px; background: #dcfce7; color: #15803d;">
+                                ✅ New Photo Selected
+                            </span>
+                            <button type="button" onclick="clearSelectedPhoto()" style="background: none; border: none; color: #ef4444; font-size: 13px; font-weight: bold; cursor: pointer;">
+                                🗑️ Remove / Retake
+                            </button>
+                        </div>
+                        <img id="finalPhotoPreview" src="" alt="New Land Photo Preview" style="width: 100%; max-height: 260px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    </div>
+
+                    <!-- HIDDEN FORM INPUTS -->
+                    <input type="file" name="image" id="actualImageInput" style="display: none;">
+                    <input type="hidden" name="captured_image_data" id="capturedImageData">
+                    <canvas id="snapshotCanvas" style="display: none;"></canvas>
+                </div>
+
+                <!-- GPS LIVE LOCATION SECTION -->
+                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 15px; margin: 15px 0; text-align: left;">
+                    
+                    <h3 style="font-size: 16px; color: #166534; margin-bottom: 8px;">
+                        📍 Live GPS & Map Location
+                    </h3>
+
+                    <p style="font-size: 13px; color: #475569; margin-bottom: 12px;">
+                        Click below to re-capture live GPS location, or drag the marker to adjust the exact plot spot.
+                    </p>
+
+                    <!-- LIVE GPS RE-CAPTURE BUTTON -->
+                    <button
+                        type="button"
+                        class="location-btn"
+                        id="gpsBtn"
+                        onclick="getLiveGPSLocation()"
+                        style="width: 100%; padding: 12px; margin-bottom: 10px; font-weight: bold; background: #16a34a; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        🛰️ Re-Capture My Live GPS Location
+                    </button>
+
+                    <!-- GPS STATUS BADGE -->
+                    <div id="gpsStatus" class="gps-status-badge"></div>
+
+                    <!-- INTERACTIVE MAP PICKER -->
+                    <div id="mapPicker"></div>
+
+                    <p style="font-size: 12px; color: #64748b; margin-top: 5px; text-align: center;">
+                        💡 <em>Tip: Drag the pin or click on the map to set the exact spot.</em>
+                    </p>
+
+                    <!-- LAT & LNG INPUTS -->
+                    <div class="coords-grid" style="margin-top: 10px;">
+                        <div>
+                            <label style="font-size: 12px; font-weight: 600; color: #334155;">Latitude</label>
+                            <input
+                                type="text"
+                                name="latitude"
+                                id="latitude"
+                                value="{{ land.latitude if land.latitude is not none else '' }}"
+                                placeholder="Latitude"
+                                readonly
+                                style="background: #f8fafc; font-size: 13px; padding: 8px 10px; margin-top: 4px;"
+                            >
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; font-weight: 600; color: #334155;">Longitude</label>
+                            <input
+                                type="text"
+                                name="longitude"
+                                id="longitude"
+                                value="{{ land.longitude if land.longitude is not none else '' }}"
+                                placeholder="Longitude"
+                                readonly
+                                style="background: #f8fafc; font-size: 13px; padding: 8px 10px; margin-top: 4px;"
+                            >
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- SAVE CHANGES BUTTON -->
+                <button
+                    type="submit"
+                    class="primary-btn"
+                    style="margin-top: 15px;">
+                    💾 Save Changes
+                </button>
+
+            </form>
+
+            <br>
+            <a href="/my-lands" class="back-profile-btn">
+                ← Back to My Lands
+            </a>
+        </div>
+    </section>
+
+    <!-- ================= LEAFLET MAP JS ================= -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+    let initialLat = {{ land.latitude if land.latitude is not none else 20.5937 }};
+    let initialLng = {{ land.longitude if land.longitude is not none else 78.9629 }};
+    let hasCoords = {{ 'true' if land.latitude is not none and land.longitude is not none else 'false' }};
+    let initialZoom = hasCoords ? 16 : 5;
+
+    // Initialize Map
+    const map = L.map('mapPicker').setView([initialLat, initialLng], initialZoom);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    let marker = null;
+
+    function setCoordinates(lat, lng, zoomLevel = 16) {
+        lat = parseFloat(lat).toFixed(6);
+        lng = parseFloat(lng).toFixed(6);
+
+        document.getElementById("latitude").value = lat;
+        document.getElementById("longitude").value = lng;
+
+        if (marker) {
+            marker.setLatLng([lat, lng]);
+        } else {
+            marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+            marker.on('dragend', function (e) {
+                const position = marker.getLatLng();
+                setCoordinates(position.lat, position.lng, map.getZoom());
+                reverseGeocode(position.lat, position.lng);
+            });
+        }
+
+        map.setView([lat, lng], zoomLevel);
+        marker.bindPopup("<b>🏡 Plot Location</b><br>Lat: " + lat + "<br>Lng: " + lng).openPopup();
+    }
+
+    if (hasCoords) {
+        setCoordinates(initialLat, initialLng, 16);
+    }
+
+    // Map click listener
+    map.on('click', function (e) {
+        setCoordinates(e.latlng.lat, e.latlng.lng, map.getZoom());
+        reverseGeocode(e.latlng.lat, e.latlng.lng);
+    });
+
+    // High Accuracy GPS Geolocation function
+    function getLiveGPSLocation() {
+        const statusDiv = document.getElementById("gpsStatus");
+        const gpsBtn = document.getElementById("gpsBtn");
+
+        if (!navigator.geolocation) {
+            statusDiv.className = "gps-status-badge gps-error";
+            statusDiv.innerText = "❌ Geolocation is not supported by your browser.";
+            return;
+        }
+
+        statusDiv.className = "gps-status-badge gps-loading";
+        statusDiv.innerText = "📡 Accessing high-accuracy GPS... Please wait.";
+        gpsBtn.disabled = true;
+
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                gpsBtn.disabled = false;
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const accuracy = position.coords.accuracy ? Math.round(position.coords.accuracy) : null;
+
+                setCoordinates(lat, lng, 17);
+
+                statusDiv.className = "gps-status-badge gps-success";
+                statusDiv.innerText = `✅ Live GPS Captured! Accuracy: ±${accuracy || 5} meters.`;
+
+                reverseGeocode(lat, lng);
+            },
+            function (error) {
+                gpsBtn.disabled = false;
+                statusDiv.className = "gps-status-badge gps-error";
+                let msg = "❌ Unable to capture GPS.";
+                if (error.code === error.PERMISSION_DENIED) {
+                    msg = "❌ Location permission denied. Please allow location access in your browser.";
+                } else if (error.code === error.POSITION_UNAVAILABLE) {
+                    msg = "❌ GPS position unavailable. Please ensure GPS is turned on.";
+                } else if (error.code === error.TIMEOUT) {
+                    msg = "❌ GPS request timed out. Please try again.";
+                }
+                statusDiv.innerText = msg;
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 12000,
+                maximumAge: 0
+            }
+        );
+    }
+
+    // Reverse Geocoding
+    function reverseGeocode(lat, lng) {
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.display_name) {
+                    const locInput = document.getElementById("locationName");
+                    if (!locInput.value || locInput.value.trim() === "") {
+                        locInput.value = data.display_name.split(',').slice(0, 4).join(',');
+                    }
+                }
+            })
+            .catch(() => {});
+    }
+
+    window.addEventListener("load", () => {
+        setTimeout(() => { map.invalidateSize(); }, 300);
+    });
+
+    // ================= PHOTO CAPTURE & UPLOAD LOGIC =================
+    let activeVideoStream = null;
+    let currentFacingMode = "environment"; // Prioritize back camera for land/field photo
+
+    function switchPhotoTab(tab) {
+        const camBtn = document.getElementById("tabCameraBtn");
+        const galBtn = document.getElementById("tabGalleryBtn");
+        const camPanel = document.getElementById("cameraShootPanel");
+        const galPanel = document.getElementById("galleryUploadPanel");
+
+        if (tab === 'camera') {
+            camBtn.style.background = "#7c5cff";
+            camBtn.style.color = "white";
+            camBtn.style.borderColor = "#7c5cff";
+            galBtn.style.background = "white";
+            galBtn.style.color = "#475569";
+            galBtn.style.borderColor = "#cbd5e1";
+
+            camPanel.style.display = "block";
+            galPanel.style.display = "none";
+        } else {
+            galBtn.style.background = "#7c5cff";
+            galBtn.style.color = "white";
+            galBtn.style.borderColor = "#7c5cff";
+            camBtn.style.background = "white";
+            camBtn.style.color = "#475569";
+            camBtn.style.borderColor = "#cbd5e1";
+
+            galPanel.style.display = "block";
+            camPanel.style.display = "none";
+
+            stopLiveCamera();
+        }
+    }
+
+    function startLiveCamera() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert("Camera stream is not supported in this browser. Please use the 'Direct Phone Camera' option or file upload.");
+            return;
+        }
+
+        const video = document.getElementById("cameraVideo");
+        const placeholder = document.getElementById("cameraPlaceholder");
+        const controls = document.getElementById("cameraActiveControls");
+        const overlay = document.getElementById("cameraOverlay");
+
+        stopLiveCamera();
+
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: { ideal: currentFacingMode },
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            },
+            audio: false
+        })
+        .then(stream => {
+            activeVideoStream = stream;
+            video.srcObject = stream;
+            video.style.display = "block";
+            placeholder.style.display = "none";
+            controls.style.display = "flex";
+            overlay.style.display = "block";
+            video.play();
+        })
+        .catch(err => {
+            alert("Camera access error: " + (err.message || "Permission denied. Please allow camera permissions in your browser."));
+        });
+    }
+
+    function stopLiveCamera() {
+        if (activeVideoStream) {
+            activeVideoStream.getTracks().forEach(track => track.stop());
+            activeVideoStream = null;
+        }
+        const video = document.getElementById("cameraVideo");
+        const placeholder = document.getElementById("cameraPlaceholder");
+        const controls = document.getElementById("cameraActiveControls");
+        const overlay = document.getElementById("cameraOverlay");
+
+        if (video) video.style.display = "none";
+        if (placeholder) placeholder.style.display = "block";
+        if (controls) controls.style.display = "none";
+        if (overlay) overlay.style.display = "none";
+    }
+
+    function flipCameraDevice() {
+        currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
+        startLiveCamera();
+    }
+
+    function takeLiveSnapshot() {
+        const video = document.getElementById("cameraVideo");
+        if (!video || !activeVideoStream) {
+            alert("Camera is not active.");
+            return;
+        }
+
+        const canvas = document.getElementById("snapshotCanvas");
+        canvas.width = video.videoWidth || 1280;
+        canvas.height = video.videoHeight || 720;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const base64Data = canvas.toDataURL("image/jpeg", 0.92);
+        document.getElementById("capturedImageData").value = base64Data;
+
+        // Display Preview
+        const preview = document.getElementById("finalPhotoPreview");
+        preview.src = base64Data;
+        document.getElementById("photoPreviewBadge").innerText = "📸 Live Camera Shot Captured";
+        document.getElementById("photoPreviewBadge").style.background = "#dcfce7";
+        document.getElementById("photoPreviewBadge").style.color = "#15803d";
+        document.getElementById("photoPreviewContainer").style.display = "block";
+
+        // Set File in hidden file input if supported
+        canvas.toBlob(blob => {
+            if (blob) {
+                try {
+                    const file = new File([blob], "live_land_photo.jpg", { type: "image/jpeg" });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    document.getElementById("actualImageInput").files = dataTransfer.files;
+                } catch (e) {}
+            }
+        }, "image/jpeg", 0.92);
+
+        stopLiveCamera();
+    }
+
+    function handleGalleryFile(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById("finalPhotoPreview").src = e.target.result;
+                document.getElementById("capturedImageData").value = "";
+                document.getElementById("photoPreviewBadge").innerText = "📁 New File Selected (" + file.name + ")";
+                document.getElementById("photoPreviewBadge").style.background = "#eff6ff";
+                document.getElementById("photoPreviewBadge").style.color = "#1d4ed8";
+                document.getElementById("photoPreviewContainer").style.display = "block";
+
+                // Sync with actualImageInput
+                try {
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    document.getElementById("actualImageInput").files = dataTransfer.files;
+                } catch(err) {}
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function handleDirectCameraFile(input) {
+        handleGalleryFile(input);
+        if (input.files && input.files[0]) {
+            document.getElementById("photoPreviewBadge").innerText = "📱 Phone Camera Shot (" + input.files[0].name + ")";
+        }
+    }
+
+    function clearSelectedPhoto() {
+        document.getElementById("finalPhotoPreview").src = "";
+        document.getElementById("capturedImageData").value = "";
+        document.getElementById("actualImageInput").value = "";
+        document.getElementById("galleryFileInput").value = "";
+        document.getElementById("mobileDirectCameraInput").value = "";
+        document.getElementById("photoPreviewContainer").style.display = "none";
+    }
+    </script>
+
+    <!-- ================= FOOTER ================= -->
+    <footer>
+        <p>© 2026 MyWebsite. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

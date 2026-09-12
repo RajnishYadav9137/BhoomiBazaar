@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist (Saved Lands) - MyWebsite</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            margin: 0;
+            padding: 0;
+            color: #1e293b;
+        }
+
+        .navbar {
+            background: #1e293b;
+            color: white;
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: #cbd5e1;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+        }
+
+        .navbar a:hover {
+            color: white;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            color: #0f172a;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wishlist-count-badge {
+            background: #ffe4e6;
+            color: #e11d48;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border: 1px solid #fecdd3;
+        }
+
+        .land-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+            gap: 25px;
+        }
+
+        .land-card {
+            background: white;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .land-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .land-card-img-wrapper {
+            position: relative;
+            width: 100%;
+            height: 210px;
+            background: #f1f5f9;
+        }
+
+        .land-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .status-available {
+            background: #16a34a;
+        }
+
+        .status-sold {
+            background: #dc2626;
+        }
+
+        .remove-wishlist-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: white;
+            border: 1px solid #fecdd3;
+            color: #e11d48;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            font-size: 18px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .remove-wishlist-btn:hover {
+            background: #fee2e2;
+            transform: scale(1.1);
+        }
+
+        .land-content {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .land-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+            color: #0f172a;
+            line-height: 1.3;
+        }
+
+        .land-info-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .land-price-tag {
+            font-size: 20px;
+            font-weight: 800;
+            color: #16a34a;
+            margin: 12px 0 10px 0;
+        }
+
+        .seller-chip {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .seller-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1.5px solid #cbd5e1;
+        }
+
+        .seller-avatar-fallback {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #7c5cff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        .btn-view {
+            grid-column: span 2;
+            background: #7c5cff;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .btn-view:hover {
+            background: #6a48e6;
+        }
+
+        .btn-whatsapp {
+            background: #25d366;
+            color: white;
+            padding: 9px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-call {
+            background: #0284c7;
+            color: white;
+            padding: 9px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .empty-wishlist {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 16px;
+            border: 2px dashed #cbd5e1;
+            margin-top: 20px;
+        }
+
+        .empty-wishlist h2 {
+            color: #334155;
+            margin-bottom: 10px;
+        }
+
+        .empty-wishlist p {
+            color: #64748b;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">
+            <span style="color: #7c5cff; font-weight: bold;">✦</span> <b>MyWebsite</b>
+        </div>
+        <div>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/lands">Explore Lands</a>
+            <a href="/my-lands">My Listings</a>
+            <a href="/wishlist" style="color: #f43f5e; font-weight: bold;">❤️ Wishlist</a>
+            <a href="/profile">Profile</a>
+            <a href="/logout" style="color: #ef4444;">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>{{ message }}</span>
+                            <button type="button" class="alert-close" onclick="this.parentElement.remove();">&times;</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Header -->
+        <div class="page-header">
+            <div>
+                <h1>
+                    <span>❤️</span> My Wishlist (Saved Lands)
+                    <span class="wishlist-count-badge">{{ lands|length }} Saved</span>
+                </h1>
+                <p style="color: #64748b; margin-top: 5px; font-size: 14px;">
+                    Lands you have bookmarked and saved for later review.
+                </p>
+            </div>
+            <div>
+                <a href="/lands" class="primary-btn" style="background: #16a34a; color: white; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">
+                    🔍 Browse More Lands
+                </a>
+            </div>
+        </div>
+
+        {% if lands and lands|length > 0 %}
+            <div class="land-grid">
+                {% for land in lands %}
+                    <div class="land-card" id="landCard{{ land.id }}">
+                        
+                        <div class="land-card-img-wrapper">
+                            {% if land.image %}
+                                <img src="{{ url_for('static', filename='uploads/' + land.image) }}" alt="{{ land.title }}">
+                            {% else %}
+                                <div style="height: 100%; display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #64748b; font-weight: bold;">
+                                    🏞️ No Photo Available
+                                </div>
+                            {% endif %}
+
+                            <!-- Status Badge -->
+                            <span class="status-badge {% if land.status == 'Sold' %}status-sold{% else %}status-available{% endif %}">
+                                {% if land.status == 'Sold' %}🔴 Sold Out{% else %}🟢 Available{% endif %}
+                            </span>
+
+                            <!-- Remove from Wishlist Heart Button -->
+                            <a href="/toggle-wishlist/{{ land.id }}" class="remove-wishlist-btn" title="Remove from Wishlist">
+                                ❤️
+                            </a>
+                        </div>
+
+                        <div class="land-content">
+                            <h3 class="land-title">{{ land.title }}</h3>
+
+                            <div class="land-info-row">
+                                <span>📍</span>
+                                <span style="font-weight: 500;">{{ land.location }}</span>
+                            </div>
+
+                            <div class="land-info-row">
+                                <span>📐</span>
+                                <span><b>Area:</b> {{ land.area }}</span>
+                            </div>
+
+                            <div class="land-price-tag">
+                                ₹ {{ "{:,.0f}".format(land.price) }}
+                            </div>
+
+                            <!-- Seller Info Chip -->
+                            <div class="seller-chip">
+                                {% if land.seller_profile_pic %}
+                                    <img src="{{ url_for('static', filename='uploads/' + land.seller_profile_pic) }}" 
+                                         alt="{{ land.seller_name }}" 
+                                         class="seller-avatar">
+                                {% else %}
+                                    <div class="seller-avatar-fallback">
+                                        {{ land.seller_name[0] | upper if land.seller_name else 'S' }}
+                                    </div>
+                                {% endif %}
+                                <div style="overflow: hidden; flex: 1;">
+                                    <div style="font-size: 13px; font-weight: bold; color: #1e293b; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+                                        {{ land.seller_name }}
+                                    </div>
+                                    <div style="font-size: 11px; color: #64748b; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+                                        ✉️ {{ land.seller_email }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="actions-grid">
+                                <a href="/land/{{ land.id }}" class="btn-view">
+                                    👀 View Full Details
+                                </a>
+                                {% if land.seller_mobile %}
+                                    <a href="https://wa.me/91{{ land.seller_mobile }}?text=Hello%20{{ land.seller_name }},%20I%20am%20interested%20in%20your%20land%20listing:%20{{ land.title }}" 
+                                       target="_blank" 
+                                       class="btn-whatsapp">
+                                        💬 WhatsApp
+                                    </a>
+                                    <a href="tel:{{ land.seller_mobile }}" class="btn-call">
+                                        📞 Call
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-wishlist">
+                <div style="font-size: 60px; margin-bottom: 15px;">🤍</div>
+                <h2>Your Wishlist is Empty</h2>
+                <p>You haven't saved any land properties to your wishlist yet.</p>
+                <a href="/lands" class="primary-btn" style="background: #7c5cff; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">
+                    Explore Available Lands
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

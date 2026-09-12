@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard - MyWebsite</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+
+<!-- ================= NAVBAR ================= -->
+
+<nav class="navbar">
+
+    <div class="logo">
+        <span>✦</span> MyWebsite
+    </div>
+
+    <div class="nav-links">
+
+        <a href="/">Home</a>
+
+        <a href="/profile">Profile</a>
+
+        <a href="/about">About</a>
+
+        <a href="/services">Services</a>
+
+        <a href="/contact">Contact</a>
+
+    </div>
+
+    <a href="/logout"
+       class="logout-btn">
+
+        Logout
+
+    </a>
+
+</nav>
+
+
+<!-- ================= DASHBOARD ================= -->
+
+<section class="dashboard-section">
+
+    <div class="dashboard-box">
+
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px;">
+            {% if profile_pic %}
+                <img
+                    src="{{ url_for('static', filename='uploads/' + profile_pic) }}"
+                    alt="{{ name }}"
+                    style="width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid #7c5cff; box-shadow: 0 4px 12px rgba(124,92,255,0.3);"
+                >
+            {% else %}
+                <span style="font-size: 38px;">👋</span>
+            {% endif %}
+            <h1 style="margin: 0;">
+                Welcome, {{ name }}
+            </h1>
+        </div>
+
+        <p class="dashboard-subtitle">
+            Welcome to your MyWebsite dashboard.
+        </p>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>{{ message }}</span>
+                            <button type="button" class="alert-close" onclick="this.parentElement.remove();">&times;</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="dashboard-cards">
+
+
+            <!-- ================= MY PROFILE ================= -->
+
+            <div class="dashboard-card">
+
+                <div class="card-icon">
+                    {% if profile_pic %}
+                        <img
+                            src="{{ url_for('static', filename='uploads/' + profile_pic) }}"
+                            alt="{{ name }}"
+                            style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #7c5cff;"
+                        >
+                    {% else %}
+                        👤
+                    {% endif %}
+                </div>
+
+                <h2>
+                    My Profile
+                </h2>
+
+                <p>
+                    View your personal information.
+                </p>
+
+                <a href="/profile"
+                   class="primary-btn">
+
+                    View Profile
+
+                </a>
+
+            </div>
+
+
+            <!-- ================= EDIT PROFILE ================= -->
+
+            <div class="dashboard-card">
+
+                <div class="card-icon">
+                    ✏️
+                </div>
+
+                <h2>
+                    Edit Profile
+                </h2>
+
+                <p>
+                    Update your name, mobile number
+                    and email.
+                </p>
+
+                <a href="/edit-profile"
+                   class="primary-btn">
+
+                    Edit Profile
+
+                </a>
+
+            </div>
+
+
+            <!-- ================= CHANGE PASSWORD ================= -->
+
+            <div class="dashboard-card">
+
+                <div class="card-icon">
+                    🔐
+                </div>
+
+                <h2>
+                    Change Password
+                </h2>
+
+                <p>
+                    Update your account password.
+                </p>
+
+                <a href="/change-password"
+                   class="primary-btn">
+
+                    Change Password
+
+                </a>
+
+            </div>
+
+
+            <!-- ================= SELL LAND ================= -->
+
+            <div class="dashboard-card">
+
+                <div class="card-icon">
+                    🏡
+                </div>
+
+                <h2>
+                    Sell Your Land
+                </h2>
+
+                <p>
+                    Upload your land details, photo
+                    and location for buyers.
+                </p>
+
+                <a href="/sell-land"
+                   class="primary-btn">
+
+                    🏡 Sell Land
+
+                </a>
+
+            </div>
+
+
+            <!-- ================= MY LANDS ================= -->
+
+            <div class="dashboard-card">
+
+                <div class="card-icon">
+                    🌳
+                </div>
+
+                <h2>
+                    My Lands
+                </h2>
+
+                <p>
+                    View all the lands that you
+                    have uploaded for sale.
+                </p>
+
+                <a href="/my-lands"
+                   class="primary-btn">
+
+                    👀 View My Lands
+
+                </a>
+
+            </div>
+
+
+            <!-- ================= VIEW ALL LANDS ================= -->
+
+            <div class="dashboard-card">
+
+                <div class="card-icon">
+                    🗺️
+                </div>
+
+                <h2>
+                    Available Lands
+                </h2>
+
+                <p>
+                    View lands uploaded by sellers
+                    and find land to purchase.
+                </p>
+
+                <a href="/lands"
+                   class="primary-btn">
+
+                    🗺️ View All Lands
+
+                </a>
+
+            </div>
+
+
+            <!-- ================= MY WISHLIST / SAVED LANDS ================= -->
+
+            <div class="dashboard-card">
+
+                <div class="card-icon">
+                    ❤️
+                </div>
+
+                <h2>
+                    My Wishlist
+                </h2>
+
+                <p>
+                    View and manage your saved and
+                    favorite land listings.
+                </p>
+
+                <a href="/wishlist"
+                   class="primary-btn"
+                   style="background: #e11d48;">
+
+                    ❤️ View Wishlist
+
+                </a>
+
+            </div>
+
+
+            <!-- ================= HOME ================= -->
+
+            <div class="dashboard-card">
+
+                <div class="card-icon">
+                    🏠
+                </div>
+
+                <h2>
+                    Home
+                </h2>
+
+                <p>
+                    Go back to the main website.
+                </p>
+
+                <a href="/"
+                   class="primary-btn">
+
+                    Go to Home
+
+                </a>
+
+            </div>
+
+
+            <!-- ================= LOGOUT ================= -->
+
+            <div class="dashboard-card">
+
+                <div class="card-icon">
+                    🚪
+                </div>
+
+                <h2>
+                    Logout
+                </h2>
+
+                <p>
+                    Logout from your account securely.
+                </p>
+
+                <a href="/logout"
+                   class="primary-btn">
+
+                    Logout
+
+                </a>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer>
+
+    <p>
+        © 2026 MyWebsite. All rights reserved.
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>
